@@ -76,12 +76,17 @@ void AudioAnalyzer::extractRepeaterMessages(const std::string& filePath) {
     trimSilence(outputDir + "BatteryCharging.wav", outputDir + "BatteryCharging_trimmed.wav");
     trimSilence(outputDir + "RepeaterID.wav", outputDir + "RepeaterID_trimmed.wav");
 
-    // Transcribe the trimmed audio segments and rename based on transcription
+    // Handle different types of audio segments
+    handleDeadAir(outputDir + "WrongNumberOfCodes_trimmed.wav", outputDir + "WrongNumberOfCodes_final.wav");
+    handleCallsignIdentification(outputDir + "RepeaterID_trimmed.wav", outputDir + "RepeaterID_final.wav");
+    handleMorseCode(outputDir + "RepeaterID_trimmed.wav", outputDir + "RepeaterID_final.wav");
+
+    // Transcribe the final audio segments and rename based on transcription
     std::string transcription;
-    transcription = transcribeAudio(outputDir + "WrongNumberOfCodes_trimmed.wav");
+    transcription = transcribeAudio(outputDir + "WrongNumberOfCodes_final.wav");
     if (!transcription.empty()) {
         std::string newFileName = outputDir + transcription + ".wav";
-        std::rename((outputDir + "WrongNumberOfCodes_trimmed.wav").c_str(), newFileName.c_str());
+        std::rename((outputDir + "WrongNumberOfCodes_final.wav").c_str(), newFileName.c_str());
         analysisResults += "Detected message: " + transcription + "\n";
     }
     transcription = transcribeAudio(outputDir + "RepeaterTimeout_trimmed.wav");
@@ -114,10 +119,10 @@ void AudioAnalyzer::extractRepeaterMessages(const std::string& filePath) {
         std::rename((outputDir + "BatteryCharging_trimmed.wav").c_str(), newFileName.c_str());
         analysisResults += "Detected message: " + transcription + "\n";
     }
-    transcription = transcribeAudio(outputDir + "RepeaterID_trimmed.wav");
+    transcription = transcribeAudio(outputDir + "RepeaterID_final.wav");
     if (!transcription.empty()) {
         std::string newFileName = outputDir + transcription + ".wav";
-        std::rename((outputDir + "RepeaterID_trimmed.wav").c_str(), newFileName.c_str());
+        std::rename((outputDir + "RepeaterID_final.wav").c_str(), newFileName.c_str());
         analysisResults += "Detected message: " + transcription + "\n";
     }
 }
@@ -212,6 +217,30 @@ void AudioAnalyzer::playAudioFile(const std::string& filePath, int repeatCount) 
         std::cout << "Playing audio file: " << filePath << std::endl;
         std::system(command.c_str());
     }
+}
+
+void AudioAnalyzer::handleDeadAir(const std::string& inputFilePath, const std::string& outputFilePath) {
+    // Implement logic to handle dead air
+    // Placeholder: Copy input file to output file
+    std::string command = "ffmpeg -i " + inputFilePath + " -c copy " + outputFilePath;
+    std::cout << "Handling dead air: " << command << std::endl;
+    std::system(command.c_str());
+}
+
+void AudioAnalyzer::handleCallsignIdentification(const std::string& inputFilePath, const std::string& outputFilePath) {
+    // Implement logic to handle callsign identification
+    // Placeholder: Copy input file to output file
+    std::string command = "ffmpeg -i " + inputFilePath + " -c copy " + outputFilePath;
+    std::cout << "Handling callsign identification: " << command << std::endl;
+    std::system(command.c_str());
+}
+
+void AudioAnalyzer::handleMorseCode(const std::string& inputFilePath, const std::string& outputFilePath) {
+    // Implement logic to handle Morse code
+    // Placeholder: Copy input file to output file
+    std::string command = "ffmpeg -i " + inputFilePath + " -c copy " + outputFilePath;
+    std::cout << "Handling Morse code: " << command << std::endl;
+    std::system(command.c_str());
 }
 
 void AudioAnalyzer::saveAnalysis(const std::string& outputFilePath) {

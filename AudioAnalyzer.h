@@ -23,6 +23,9 @@ private:
     std::string transcribeAudio(const std::string& audioFilePath); // New method to transcribe audio
     void trimSilence(const std::string& inputFilePath, const std::string& outputFilePath); // New method to trim silence
     void playAudioFile(const std::string& filePath, int repeatCount); // New method to play audio file
+    void handleDeadAir(const std::string& inputFilePath, const std::string& outputFilePath); // New method to handle dead air
+    void handleCallsignIdentification(const std::string& inputFilePath, const std::string& outputFilePath); // New method to handle callsign identification
+    void handleMorseCode(const std::string& inputFilePath, const std::string& outputFilePath); // New method to handle Morse code
     std::string analysisResults;
     std::string inputSourceType; // New member to store input source type
     std::string inputSource; // New member to store input source
