@@ -1,43 +1,40 @@
-#ifndef AUDIO_ANALYZER_H
-#define AUDIO_ANALYZER_H
+#ifndef AUDIOANALYZER_H
+#define AUDIOANALYZER_H
 
 #include <string>
+#include <vector>
 
 class AudioAnalyzer {
 public:
-    // Public methods
-    void analyze(const std::string& filePath);
-    void setInputSource(const std::string& sourceType, const std::string& source);
+    AudioAnalyzer();
+    ~AudioAnalyzer();
+
+    void analyzeAudio(const std::string& filePath);
     void setRepeaterCallsign(const std::string& callsign);
-    void saveAnalysis(const std::string& outputFilePath);
-    
+    void setBroadcastifyCredentials(const std::string& username, const std::string& password);
+    void downloadFromBroadcastify(const std::string& feedId, const std::string& startTime, const std::string& duration);
+    void combineAudioFiles(const std::vector<std::string>& inputFilePaths, const std::string& outputFilePath);
+    void saveAnalysisResults(const std::string& filePath);
+
 private:
-    // Private data members
-    std::string analysisResults;
-    std::string inputSourceType;
-    std::string inputSource;
     std::string repeaterCallsign;
-    
-    // Private methods
-    void handleInputSource();
-    void handleFileInput();
-    void handleMicrophoneInput();
-    void handleDesktopPlaybackInput();
-    
+    std::string broadcastifyUsername;
+    std::string broadcastifyPassword;
+    std::string analysisResults;
+
+    // Audio Processing Methods
     void extractDTMF(const std::string& filePath);
-    void extractCourtesyBeeps(const std::string& filePath);
-    void extractRepeaterID(const std::string& filePath);
-    void extractSKYWARN(const std::string& filePath);
     void extractRepeaterMessages(const std::string& filePath);
-    
-    void extractAudioSegment(const std::string& inputFilePath, const std::string& outputFilePath, const std::string& startTime, const std::string& duration);
-    std::string transcribeAudio(const std::string& audioFilePath);
+    std::string transcribeAudio(const std::string& filePath);
     void trimSilence(const std::string& inputFilePath, const std::string& outputFilePath);
-    void playAudioFile(const std::string& filePath, int repeatCount);
-    
-    void handleDeadAir(const std::string& inputFilePath, const std::string& outputFilePath);
-    void handleCallsignIdentification(const std::string& inputFilePath, const std::string& outputFilePath);
-    void handleMorseCode(const std::string& inputFilePath, const std::string& outputFilePath);
+    void extractAudioSegment(const std::string& inputFilePath, const std::string& outputFilePath, const std::string& startTime, const std::string& duration);
+
+    // Broadcastify Methods
+    bool loginToBroadcastify();
+    std::string downloadAudioFromFeed(const std::string& feedId, const std::string& startTime, const std::string& duration);
+
+    // MP3 Combination Methods
+    bool combineToMP3(const std::vector<std::string>& inputFilePaths, const std::string& outputFilePath);
 };
 
-#endif // AUDIO_ANALYZER_H
+#endif
