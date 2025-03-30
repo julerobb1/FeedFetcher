@@ -5,31 +5,39 @@
 
 class AudioAnalyzer {
 public:
+    // Public methods
     void analyze(const std::string& filePath);
+    void setInputSource(const std::string& sourceType, const std::string& source);
+    void setRepeaterCallsign(const std::string& callsign);
     void saveAnalysis(const std::string& outputFilePath);
-    void setInputSource(const std::string& sourceType, const std::string& source); // New method to set input source
-    void setRepeaterCallsign(const std::string& callsign); // New method to set repeater callsign
-
+    
 private:
+    // Private data members
+    std::string analysisResults;
+    std::string inputSourceType;
+    std::string inputSource;
+    std::string repeaterCallsign;
+    
+    // Private methods
+    void handleInputSource();
+    void handleFileInput();
+    void handleMicrophoneInput();
+    void handleDesktopPlaybackInput();
+    
     void extractDTMF(const std::string& filePath);
     void extractCourtesyBeeps(const std::string& filePath);
     void extractRepeaterID(const std::string& filePath);
     void extractSKYWARN(const std::string& filePath);
-    void extractRepeaterMessages(const std::string& filePath); // Renamed function
-    void handleFileInput(); // New method to handle file input
-    void handleMicrophoneInput(); // New method to handle microphone input
-    void handleDesktopPlaybackInput(); // New method to handle desktop playback input
-    void extractAudioSegment(const std::string& inputFilePath, const std::string& outputFilePath, const std::string& startTime, const std::string& duration); // New method to extract audio segment
-    std::string transcribeAudio(const std::string& audioFilePath); // New method to transcribe audio
-    void trimSilence(const std::string& inputFilePath, const std::string& outputFilePath); // New method to trim silence
-    void playAudioFile(const std::string& filePath, int repeatCount); // New method to play audio file
-    void handleDeadAir(const std::string& inputFilePath, const std::string& outputFilePath); // New method to handle dead air
-    void handleCallsignIdentification(const std::string& inputFilePath, const std::string& outputFilePath); // New method to handle callsign identification
-    void handleMorseCode(const std::string& inputFilePath, const std::string& outputFilePath); // New method to handle Morse code
-    std::string analysisResults;
-    std::string inputSourceType; // New member to store input source type
-    std::string inputSource; // New member to store input source
-    std::string repeaterCallsign; // New member to store repeater callsign
+    void extractRepeaterMessages(const std::string& filePath);
+    
+    void extractAudioSegment(const std::string& inputFilePath, const std::string& outputFilePath, const std::string& startTime, const std::string& duration);
+    std::string transcribeAudio(const std::string& audioFilePath);
+    void trimSilence(const std::string& inputFilePath, const std::string& outputFilePath);
+    void playAudioFile(const std::string& filePath, int repeatCount);
+    
+    void handleDeadAir(const std::string& inputFilePath, const std::string& outputFilePath);
+    void handleCallsignIdentification(const std::string& inputFilePath, const std::string& outputFilePath);
+    void handleMorseCode(const std::string& inputFilePath, const std::string& outputFilePath);
 };
 
 #endif // AUDIO_ANALYZER_H
