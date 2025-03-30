@@ -3,7 +3,6 @@
 #include <fstream>
 #include <regex>
 #include <cstdlib>
-#include <google/cloud/speech/v1/cloud_speech_client.h>
 
 void AudioAnalyzer::analyze(const std::string& filePath) {
     analysisResults.clear();
@@ -178,30 +177,9 @@ void AudioAnalyzer::extractAudioSegment(const std::string& inputFilePath, const 
 }
 
 std::string AudioAnalyzer::transcribeAudio(const std::string& audioFilePath) {
-    // Use Google's Speech-to-Text API to transcribe the audio
-    google::cloud::speech::v1::SpeechClient client;
-    google::cloud::speech::v1::RecognitionConfig config;
-    config.set_encoding(google::cloud::speech::v1::RecognitionConfig::LINEAR16);
-    config.set_sample_rate_hertz(16000);
-    config.set_language_code("en-US");
-
-    google::cloud::speech::v1::RecognitionAudio audio;
-    std::ifstream audio_file(audioFilePath, std::ios::binary);
-    audio.set_content(std::string((std::istreambuf_iterator<char>(audio_file)), std::istreambuf_iterator<char>()));
-
-    auto response = client.Recognize(config, audio);
-    if (!response) {
-        std::cerr << "Error: " << response.status() << "\n";
-        return "";
-    }
-
-    std::string transcription;
-    for (const auto& result : response->results()) {
-        for (const auto& alternative : result.alternatives()) {
-            transcription += alternative.transcript() + "\n";
-        }
-    }
-    return transcription;
+    // Placeholder transcription logic
+    std::cout << "Transcribing audio file: " << audioFilePath << std::endl;
+    return "Transcription not implemented (Google Cloud SDK not available)";
 }
 
 void AudioAnalyzer::trimSilence(const std::string& inputFilePath, const std::string& outputFilePath) {
