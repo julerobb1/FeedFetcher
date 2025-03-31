@@ -1,40 +1,35 @@
-#ifndef AUDIOANALYZER_H
-#define AUDIOANALYZER_H
+#ifndef AUDIO_ANALYZER_H
+#define AUDIO_ANALYZER_H
 
 #include <string>
-#include <vector>
 
 class AudioAnalyzer {
 public:
-    AudioAnalyzer();
-    ~AudioAnalyzer();
-
-    void analyzeAudio(const std::string& filePath);
-    void setRepeaterCallsign(const std::string& callsign);
-    void setBroadcastifyCredentials(const std::string& username, const std::string& password);
-    void downloadFromBroadcastify(const std::string& feedId, const std::string& startTime, const std::string& duration);
-    void combineAudioFiles(const std::vector<std::string>& inputFilePaths, const std::string& outputFilePath);
-    void saveAnalysisResults(const std::string& filePath);
+    void analyze(const std::string& filePath);
+    void saveAnalysis(const std::string& outputFilePath);
+    void setInputSource(const std::string& sourceType, const std::string& source); // New method to set input source
+    void setRepeaterCallsign(const std::string& callsign); // New method to set repeater callsign
 
 private:
-    std::string repeaterCallsign;
-    std::string broadcastifyUsername;
-    std::string broadcastifyPassword;
-    std::string analysisResults;
-
-    // Audio Processing Methods
     void extractDTMF(const std::string& filePath);
-    void extractRepeaterMessages(const std::string& filePath);
-    std::string transcribeAudio(const std::string& filePath);
-    void trimSilence(const std::string& inputFilePath, const std::string& outputFilePath);
-    void extractAudioSegment(const std::string& inputFilePath, const std::string& outputFilePath, const std::string& startTime, const std::string& duration);
-
-    // Broadcastify Methods
-    bool loginToBroadcastify();
-    std::string downloadAudioFromFeed(const std::string& feedId, const std::string& startTime, const std::string& duration);
-
-    // MP3 Combination Methods
-    bool combineToMP3(const std::vector<std::string>& inputFilePaths, const std::string& outputFilePath);
+    void extractCourtesyBeeps(const std::string& filePath);
+    void extractRepeaterID(const std::string& filePath);
+    void extractSKYWARN(const std::string& filePath);
+    void extractRepeaterMessages(const std::string& filePath); // Renamed function
+    void handleFileInput(); // New method to handle file input
+    void handleMicrophoneInput(); // New method to handle microphone input
+    void handleDesktopPlaybackInput(); // New method to handle desktop playback input
+    void extractAudioSegment(const std::string& inputFilePath, const std::string& outputFilePath, const std::string& startTime, const std::string& duration); // New method to extract audio segment
+    std::string transcribeAudio(const std::string& audioFilePath); // New method to transcribe audio
+    void trimSilence(const std::string& inputFilePath, const std::string& outputFilePath); // New method to trim silence
+    void playAudioFile(const std::string& filePath, int repeatCount); // New method to play audio file
+    void handleDeadAir(const std::string& inputFilePath, const std::string& outputFilePath); // New method to handle dead air
+    void handleCallsignIdentification(const std::string& inputFilePath, const std::string& outputFilePath); // New method to handle callsign identification
+    void handleMorseCode(const std::string& inputFilePath, const std::string& outputFilePath); // New method to handle Morse code
+    std::string analysisResults;
+    std::string inputSourceType; // New member to store input source type
+    std::string inputSource; // New member to store input source
+    std::string repeaterCallsign; // New member to store repeater callsign
 };
 
-#endif
+#endif // AUDIO_ANALYZER_H
