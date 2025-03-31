@@ -31,3 +31,22 @@
 *.out
 *.app
 *.csv
+.vs/CMake Overview
+.vs/cmake.db
+.vs/Mp3Combiner/copilot-chat/bb6c98d2/sessions/8bd77b6a-7c82-4ffc-8a94-4939b8331c9f
+.vs/Mp3Combiner/copilot-chat/bb6c98d2/sessions/e43cbaf2-4579-46f2-94bb-8b4d823c6144
+.vs/Mp3Combiner/CopilotIndices/17.13.441.19478/CodeChunks.db
+.vs/Mp3Combiner/CopilotIndices/17.13.441.19478/CodeChunks.db-shm
+.vs/Mp3Combiner/CopilotIndices/17.13.441.19478/CodeChunks.db-wal
+.vs/Mp3Combiner/CopilotIndices/17.13.441.19478/SemanticSymbols.db
+.vs/Mp3Combiner/FileContentIndex/6de1e75c-ffb2-42a0-8008-307e0f080a94.vsidx
+.vs/Mp3Combiner/FileContentIndex/d666418d-6ddb-45db-9126-6348f4ae64f8.vsidx
+.vs/Mp3Combiner/v17/.wsuo
+.vs/Mp3Combiner/v17/DocumentLayout.backup.json
+.vs/Mp3Combiner/v17/DocumentLayout.json
+.vs/ProjectSettings.json
+.vs/slnx.sqlite
+.vs/VSWorkspaceState.json
+.vscode/settings.json
+CMakeSettings.json
+vcpkg
