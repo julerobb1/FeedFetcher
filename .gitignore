@@ -50,3 +50,4 @@
 .vscode/settings.json
 CMakeSettings.json
 vcpkg
+*.json
