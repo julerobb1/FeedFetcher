@@ -1,25 +1,23 @@
 #pragma once
 
-#include <atlbase.h>
-#include <atlwin.h>
-#include <atlapp.h>
-#include <atldlgs.h>
-#include <atlctrls.h>
+#include <windows.h>
+#include <string> // Ensure this header is included for std::string
+#include <tchar.h> // For TCHAR and related functions
+#include <commctrl.h> // For common controls (if needed for dialog functionality)
+#include <atlbase.h> // Include ATL base header if required
 
-class CLoginDialog : public CDialogImpl<CLoginDialog> {
+class CLoginDialog {
 public:
-    enum { IDD = IDD_LOGIN };
+    CLoginDialog();
+    ~CLoginDialog();
 
-    BEGIN_MSG_MAP(CLoginDialog)
-        MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
-        COMMAND_ID_HANDLER(IDOK, OnOK)
-        COMMAND_ID_HANDLER(IDCANCEL, OnCancel)
-    END_MSG_MAP()
+    bool ShowDialog(HINSTANCE hInstance, HWND hParent);
+    std::string GetUsername() const;
+    std::string GetPassword() const;
 
-    std::string username;
-    std::string password;
+private:
+    static INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-    LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
-    LRESULT OnOK(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
-    LRESULT OnCancel(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+    std::string username; // Ensure std::string is correctly used
+    std::string password; // Ensure std::string is correctly used
 };

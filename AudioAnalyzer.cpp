@@ -1,257 +1,114 @@
-#include "AudioAnalyzer.h"
 #include <iostream>
 #include <fstream>
-#include <regex>
-#include <cstdlib>
-#include <google/cloud/speech/v1/cloud_speech_client.h>
+#include <vector>
+#include <string>
+#include <filesystem>
+class AudioAnalyzer {
+public:
+    void analyze(const std::vector<std::string>& filePaths, const std::string& outputFilePath);
+    void trimSilence(const std::string& inputFilePath, const std::string& outputFilePath);
+    void mergeFiles(const std::vector<std::string>& inputFiles, const std::string& outputFilePath);
+    void extractRepeaterMessages(const std::string& inputFilePath, const std::string& outputDir);
+    void extractCourtesyBeeps(const std::string& inputFilePath, const std::string& outputDir);
+    void transcribeAudio(const std::string& inputFilePath, const std::string& outputFilePath);
 
-void AudioAnalyzer::analyze(const std::string& filePath) {
-    analysisResults.clear();
-    handleInputSource(); // Use the new input handling method
-    extractDTMF(filePath);
-    extractCourtesyBeeps(filePath);
-    extractRepeaterID(filePath);
-    extractSKYWARN(filePath);
-    extractRepeaterMessages(filePath); // Call the renamed function
-}
+private:
+    void executeCommand(const std::string& command);
+};
 
-void AudioAnalyzer::setInputSource(const std::string& sourceType, const std::string& source) {
-    inputSourceType = sourceType;
-    inputSource = source;
-}
+void AudioAnalyzer::analyze(const std::vector<std::string>& filePaths, const std::string& outputFilePath) {
+    std::vector<std::string> processedFiles;
 
-void AudioAnalyzer::setRepeaterCallsign(const std::string& callsign) {
-    repeaterCallsign = callsign;
-}
+    for (const auto& filePath : filePaths) {
+        std::string outputDir = "processed_segments/";
+        std::filesystem::create_directory(outputDir);
 
-void AudioAnalyzer::extractDTMF(const std::string& filePath) {
-    // Implement the logic to extract DTMF tones from the audio file
-    std::cout << "Extracting DTMF tones from " << filePath << std::endl;
-    analysisResults += "DTMF tones extracted from " + filePath + "\n";
-}
+        extractCourtesyBeeps(filePath, outputDir);
+        extractRepeaterMessages(filePath, outputDir);
 
-void AudioAnalyzer::extractCourtesyBeeps(const std::string& filePath) {
-    // Implement the logic to extract courtesy beeps from the audio file
-    std::cout << "Extracting courtesy beeps from " << filePath << std::endl;
-    analysisResults += "Courtesy beeps extracted from " + filePath + "\n";
-}
-
-void AudioAnalyzer::extractRepeaterID(const std::string& filePath) {
-    // Implement the logic to extract repeater identification from the audio file
-    std::cout << "Extracting repeater identification from " << filePath << std::endl;
-    analysisResults += "Repeater identification extracted from " + filePath + "\n";
-}
-
-void AudioAnalyzer::extractSKYWARN(const std::string& filePath) {
-    // Implement the logic to extract SKYWARN announcements from the audio file
-    std::cout << "Extracting SKYWARN announcements from " << filePath << std::endl;
-    analysisResults += "SKYWARN announcements extracted from " + filePath + "\n";
-}
-
-void AudioAnalyzer::extractRepeaterMessages(const std::string& filePath) {
-    // Implement the logic to extract repeater messages from the audio file
-    std::cout << "Extracting repeater messages from " << filePath << std::endl;
-
-    // Example logic to differentiate repeater messages from normal conversation
-    // This is a placeholder and should be replaced with actual logic
-    std::string outputDir = "extracted_segments/";
-    std::string startTime = "00:00:00"; // Placeholder start time
-    std::string duration = "00:00:10"; // Placeholder duration
-
-    // Extract specific segments based on criteria
-    extractAudioSegment(filePath, outputDir + "WrongNumberOfCodes.wav", startTime, duration);
-    extractAudioSegment(filePath, outputDir + "RepeaterTimeout.wav", startTime, duration);
-    extractAudioSegment(filePath, outputDir + "SevereThunderstormWatch.wav", startTime, duration);
-    extractAudioSegment(filePath, outputDir + "TornadoWatch.wav", startTime, duration);
-    extractAudioSegment(filePath, outputDir + "BatteryBackup.wav", startTime, duration);
-    extractAudioSegment(filePath, outputDir + "BatteryCharging.wav", startTime, duration);
-    extractAudioSegment(filePath, outputDir + "RepeaterID.wav", startTime, duration);
-
-    // Trim silence from the extracted audio segments
-    trimSilence(outputDir + "WrongNumberOfCodes.wav", outputDir + "WrongNumberOfCodes_trimmed.wav");
-    trimSilence(outputDir + "RepeaterTimeout.wav", outputDir + "RepeaterTimeout_trimmed.wav");
-    trimSilence(outputDir + "SevereThunderstormWatch.wav", outputDir + "SevereThunderstormWatch_trimmed.wav");
-    trimSilence(outputDir + "TornadoWatch.wav", outputDir + "TornadoWatch_trimmed.wav");
-    trimSilence(outputDir + "BatteryBackup.wav", outputDir + "BatteryBackup_trimmed.wav");
-    trimSilence(outputDir + "BatteryCharging.wav", outputDir + "BatteryCharging_trimmed.wav");
-    trimSilence(outputDir + "RepeaterID.wav", outputDir + "RepeaterID_trimmed.wav");
-
-    // Handle different types of audio segments
-    handleDeadAir(outputDir + "WrongNumberOfCodes_trimmed.wav", outputDir + "WrongNumberOfCodes_final.wav");
-    handleCallsignIdentification(outputDir + "RepeaterID_trimmed.wav", outputDir + "RepeaterID_final.wav");
-    handleMorseCode(outputDir + "RepeaterID_trimmed.wav", outputDir + "RepeaterID_final.wav");
-
-    // Transcribe the final audio segments and rename based on transcription
-    std::string transcription;
-    transcription = transcribeAudio(outputDir + "WrongNumberOfCodes_final.wav");
-    if (!transcription.empty()) {
-        std::string newFileName = outputDir + transcription + ".wav";
-        std::rename((outputDir + "WrongNumberOfCodes_final.wav").c_str(), newFileName.c_str());
-        analysisResults += "Detected message: " + transcription + "\n";
-    }
-    transcription = transcribeAudio(outputDir + "RepeaterTimeout_trimmed.wav");
-    if (!transcription.empty()) {
-        std::string newFileName = outputDir + transcription + ".wav";
-        std::rename((outputDir + "RepeaterTimeout_trimmed.wav").c_str(), newFileName.c_str());
-        analysisResults += "Detected message: " + transcription + "\n";
-    }
-    transcription = transcribeAudio(outputDir + "SevereThunderstormWatch_trimmed.wav");
-    if (!transcription.empty()) {
-        std::string newFileName = outputDir + transcription + ".wav";
-        std::rename((outputDir + "SevereThunderstormWatch_trimmed.wav").c_str(), newFileName.c_str());
-        analysisResults += "Detected message: " + transcription + "\n";
-    }
-    transcription = transcribeAudio(outputDir + "TornadoWatch_trimmed.wav");
-    if (!transcription.empty()) {
-        std::string newFileName = outputDir + transcription + ".wav";
-        std::rename((outputDir + "TornadoWatch_trimmed.wav").c_str(), newFileName.c_str());
-        analysisResults += "Detected message: " + transcription + "\n";
-    }
-    transcription = transcribeAudio(outputDir + "BatteryBackup_trimmed.wav");
-    if (!transcription.empty()) {
-        std::string newFileName = outputDir + transcription + ".wav";
-        std::rename((outputDir + "BatteryBackup_trimmed.wav").c_str(), newFileName.c_str());
-        analysisResults += "Detected message: " + transcription + "\n";
-    }
-    transcription = transcribeAudio(outputDir + "BatteryCharging_trimmed.wav");
-    if (!transcription.empty()) {
-        std::string newFileName = outputDir + transcription + ".wav";
-        std::rename((outputDir + "BatteryCharging_trimmed.wav").c_str(), newFileName.c_str());
-        analysisResults += "Detected message: " + transcription + "\n";
-    }
-    transcription = transcribeAudio(outputDir + "RepeaterID_final.wav");
-    if (!transcription.empty()) {
-        std::string newFileName = outputDir + transcription + ".wav";
-        std::rename((outputDir + "RepeaterID_final.wav").c_str(), newFileName.c_str());
-        analysisResults += "Detected message: " + transcription + "\n";
-    }
-}
-
-void AudioAnalyzer::handleInputSource() {
-    if (inputSourceType == "file") {
-        handleFileInput();
-    } else if (inputSourceType == "microphone") {
-        handleMicrophoneInput();
-    } else if (inputSourceType == "desktop_playback") {
-        handleDesktopPlaybackInput();
-    } else {
-        std::cerr << "Unknown input source type: " << inputSourceType << std::endl;
-    }
-}
-
-void AudioAnalyzer::handleFileInput() {
-    // Implement file input handling logic here
-    std::cout << "Handling file input: " << inputSource << std::endl;
-}
-
-void AudioAnalyzer::handleMicrophoneInput() {
-    // Implement microphone input handling logic here
-    std::cout << "Handling microphone input" << std::endl;
-    // Example: Use platform-specific APIs to capture audio from the microphone
-    #ifdef _WIN32
-    // Windows-specific microphone handling code
-    #elif __linux__
-    // Linux-specific microphone handling code
-    #elif __APPLE__
-    // macOS-specific microphone handling code
-    #endif
-}
-
-void AudioAnalyzer::handleDesktopPlaybackInput() {
-    // Implement desktop playback input handling logic here
-    std::cout << "Handling desktop playback input" << std::endl;
-    // Example: Use platform-specific APIs to capture audio from desktop playback
-    #ifdef _WIN32
-    // Windows-specific desktop playback handling code
-    #elif __linux__
-    // Linux-specific desktop playback handling code
-    #elif __APPLE__
-    // macOS-specific desktop playback handling code
-    #endif
-}
-
-void AudioAnalyzer::extractAudioSegment(const std::string& inputFilePath, const std::string& outputFilePath, const std::string& startTime, const std::string& duration) {
-    // Use FFmpeg to extract the audio segment
-    std::string command = "ffmpeg -i " + inputFilePath + " -ss " + startTime + " -t " + duration + " -c copy " + outputFilePath;
-    std::cout << "Executing command: " << command << std::endl;
-    std::system(command.c_str());
-}
-
-std::string AudioAnalyzer::transcribeAudio(const std::string& audioFilePath) {
-    // Use Google's Speech-to-Text API to transcribe the audio
-    google::cloud::speech::v1::SpeechClient client;
-    google::cloud::speech::v1::RecognitionConfig config;
-    config.set_encoding(google::cloud::speech::v1::RecognitionConfig::LINEAR16);
-    config.set_sample_rate_hertz(16000);
-    config.set_language_code("en-US");
-
-    google::cloud::speech::v1::RecognitionAudio audio;
-    std::ifstream audio_file(audioFilePath, std::ios::binary);
-    audio.set_content(std::string((std::istreambuf_iterator<char>(audio_file)), std::istreambuf_iterator<char>()));
-
-    auto response = client.Recognize(config, audio);
-    if (!response) {
-        std::cerr << "Error: " << response.status() << "\n";
-        return "";
+        std::string trimmedFile = filePath + "_trimmed.wav";
+        trimSilence(filePath, trimmedFile);
+        processedFiles.push_back(trimmedFile);
     }
 
-    std::string transcription;
-    for (const auto& result : response->results()) {
-        for (const auto& alternative : result.alternatives()) {
-            transcription += alternative.transcript() + "\n";
-        }
-    }
-    return transcription;
+    mergeFiles(processedFiles, outputFilePath);
+    std::cout << "Analysis complete. Output saved to: " << outputFilePath << std::endl;
 }
 
 void AudioAnalyzer::trimSilence(const std::string& inputFilePath, const std::string& outputFilePath) {
-    // Use FFmpeg to trim silence from the audio file
-    std::string command = "ffmpeg -i " + inputFilePath + " -af silenceremove=1:0:-50dB " + outputFilePath;
-    std::cout << "Executing command: " << command << std::endl;
-    std::system(command.c_str());
+    std::cout << "Trimming silence from: " << inputFilePath << std::endl;
+    std::string command = "ffmpeg -i \"" + inputFilePath + "\" -af silenceremove=1:0:-50dB \"" + outputFilePath + "\"";
+    executeCommand(command);
 }
 
-void AudioAnalyzer::playAudioFile(const std::string& filePath, int repeatCount) {
-    for (int i = 0; i < repeatCount; ++i) {
-        std::string command = "ffplay -nodisp -autoexit " + filePath;
-        std::cout << "Playing audio file: " << filePath << std::endl;
-        std::system(command.c_str());
+void AudioAnalyzer::mergeFiles(const std::vector<std::string>& inputFiles, const std::string& outputFilePath) {
+    std::cout << "Merging files into: " << outputFilePath << std::endl;
+
+    // Create a temporary file list for FFmpeg
+    std::string fileList = "file_list.txt";
+    std::ofstream listFile(fileList);
+    for (const auto& file : inputFiles) {
+        listFile << "file '" << file << "'\n";
+    }
+    listFile.close();
+
+    // Use FFmpeg to merge files
+    std::string command = "ffmpeg -f concat -safe 0 -i " + fileList + " -c copy \"" + outputFilePath + "\"";
+    executeCommand(command);
+
+    // Clean up temporary file
+    std::filesystem::remove(fileList);
+}
+
+void AudioAnalyzer::extractRepeaterMessages(const std::string& inputFilePath, const std::string& outputDir) {
+    std::cout << "Extracting repeater messages from: " << inputFilePath << std::endl;
+
+    // Placeholder logic for extracting repeater messages
+    std::string startTime = "00:00:00"; // Example start time
+    std::string duration = "00:00:10"; // Example duration
+
+    std::vector<std::string> messageTypes = {
+        "WrongNumberOfCodes", "RepeaterTimeout", "SevereThunderstormWatch",
+        "TornadoWatch", "BatteryBackup", "BatteryCharging", "RepeaterID"
+    };
+
+    for (const auto& messageType : messageTypes) {
+        std::string outputFilePath = outputDir + messageType + ".wav";
+        std::string command = "ffmpeg -i \"" + inputFilePath + "\" -ss " + startTime + " -t " + duration + " -c copy \"" + outputFilePath + "\"";
+        executeCommand(command);
     }
 }
 
-void AudioAnalyzer::handleDeadAir(const std::string& inputFilePath, const std::string& outputFilePath) {
-    // Implement logic to handle dead air
-    // Placeholder: Copy input file to output file
-    std::string command = "ffmpeg -i " + inputFilePath + " -c copy " + outputFilePath;
-    std::cout << "Handling dead air: " << command << std::endl;
-    std::system(command.c_str());
+void AudioAnalyzer::extractCourtesyBeeps(const std::string& inputFilePath, const std::string& outputDir) {
+    std::cout << "Extracting courtesy beeps from: " << inputFilePath << std::endl;
+
+    // Placeholder logic for extracting courtesy beeps
+    std::string outputFilePath = outputDir + "CourtesyBeeps.wav";
+    std::string command = "ffmpeg -i \"" + inputFilePath + "\" -af \"highpass=f=1000,lowpass=f=2000\" \"" + outputFilePath + "\"";
+    executeCommand(command);
 }
 
-void AudioAnalyzer::handleCallsignIdentification(const std::string& inputFilePath, const std::string& outputFilePath) {
-    // Implement logic to handle callsign identification
-    // Placeholder: Copy input file to output file
-    std::string command = "ffmpeg -i " + inputFilePath + " -c copy " + outputFilePath;
-    std::cout << "Handling callsign identification: " << command << std::endl;
-    std::system(command.c_str());
+void AudioAnalyzer::transcribeAudio(const std::string& inputFilePath, const std::string& outputFilePath) {
+    std::cout << "Setting up dependencies for transcription..." << std::endl;
+
+    // Run the setup script to ensure dependencies are installed
+    std::string setupCommand = "python setup.py";
+    int setupResult = std::system(setupCommand.c_str());
+    if (setupResult != 0) {
+        std::cerr << "Failed to set up dependencies. Aborting transcription." << std::endl;
+        return;
+    }
+
+    std::cout << "Transcribing audio from: " << inputFilePath << std::endl;
+
+    // Call the transcription script
+    std::string command = "python transcribe.py \"" + inputFilePath + "\" \"" + outputFilePath + "\"";
+    executeCommand(command);
 }
 
-void AudioAnalyzer::handleMorseCode(const std::string& inputFilePath, const std::string& outputFilePath) {
-    // Implement logic to handle Morse code
-    // Placeholder: Copy input file to output file
-    std::string command = "ffmpeg -i " + inputFilePath + " -c copy " + outputFilePath;
-    std::cout << "Handling Morse code: " << command << std::endl;
-    std::system(command.c_str());
-}
-
-void AudioAnalyzer::saveAnalysis(const std::string& outputFilePath) {
-    std::ofstream outFile(outputFilePath);
-    if (outFile.is_open()) {
-        outFile << analysisResults;
-        outFile.close();
-        std::cout << "Analysis results saved to " << outputFilePath << std::endl;
-        playAudioFile("success.wav", 1); // Play success sound once
-    } else {
-        std::cerr << "Failed to open file " << outputFilePath << std::endl;
-        playAudioFile("error.wav", 3); // Play error sound three times
+void AudioAnalyzer::executeCommand(const std::string& command) {
+    int result = std::system(command.c_str());
+    if (result != 0) {
+        std::cerr << "Command failed: " << command << std::endl;
     }
 }
