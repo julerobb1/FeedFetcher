@@ -14,46 +14,46 @@
 
 static HWND hProgressBar;
 
-void loginToBroadcastify(const std::string& username, const std::string& password) {
-    std::string curlPath = "third_party/curl/x64/curl.exe"; // Hardcoded to 64-bit curl
+void loginToBroadcastify(const std::wstring& username, const std::wstring& password) {
+    std::wstring curlPath = L"c:/Users/juler/Downloads/curl-8.12.1_4-win64-mingw/curl-8.12.1_4-win64-mingw/bin/curl.exe"; // Updated path
 
-    std::string cookieFile = "cookies.txt";
-    std::string loginUrl = "https://www.broadcastify.com/login";
-    std::string command = curlPath + " -c " + cookieFile + " -d \"username=" + username + "&password=" + password + "\" " + loginUrl;
+    std::wstring cookieFile = L"cookies.txt";
+    std::wstring loginUrl = L"https://www.broadcastify.com/login";
+    std::wstring command = curlPath + L" -c " + cookieFile + L" -d \"username=" + username + L"&password=" + password + L"\" " + loginUrl;
 
-    int result = std::system(command.c_str());
+    int result = _wsystem(command.c_str());
     if (result == 0) {
-        MessageBoxA(NULL, "Login successful.", "Info", MB_OK);
+        MessageBoxW(NULL, L"Login successful.", L"Info", MB_OK);
     } else {
-        MessageBoxA(NULL, "Failed to log in. Check your credentials.", "Error", MB_ICONERROR);
+        MessageBoxW(NULL, L"Failed to log in. Check your credentials.", L"Error", MB_ICONERROR);
     }
 }
 
 void downloadFeedArchives(HWND hWnd) {
-    std::string curlPath = "third_party/curl/x64/curl.exe"; // Hardcoded to 64-bit curl
+    std::wstring curlPath = L"c:/Users/juler/Downloads/curl-8.12.1_4-win64-mingw/curl-8.12.1_4-win64-mingw/bin/curl.exe"; // Updated path
 
-    std::string feedUrl = "https://example.com/user/feeds/today";
-    std::string outputFile = "archives/feed_archive.zip";
-    std::string command = curlPath + " -o " + outputFile + " " + feedUrl;
+    std::wstring feedUrl = L"https://example.com/user/feeds/today";
+    std::wstring outputFile = L"archives/feed_archive.zip";
+    std::wstring command = curlPath + L" -o " + outputFile + L" " + feedUrl;
 
     SendMessage(hProgressBar, PBM_SETPOS, 50, 0); // Update progress bar to 50%
 
-    int result = std::system(command.c_str());
+    int result = _wsystem(command.c_str());
     if (result == 0) {
         SendMessage(hProgressBar, PBM_SETPOS, 100, 0); // Update progress bar to 100%
-        MessageBoxA(hWnd, "Feed archives downloaded successfully.", "Success", MB_OK);
+        MessageBoxW(hWnd, L"Feed archives downloaded successfully.", L"Success", MB_OK);
     } else {
-        MessageBoxA(hWnd, "Failed to download feed archives.", "Error", MB_ICONERROR);
+        MessageBoxW(hWnd, L"Failed to download feed archives.", L"Error", MB_ICONERROR);
     }
 }
 
-void runTranscriber(const std::string& audioFilePath) {
-    std::string command = "run_transcriber.bat " + audioFilePath;
-    int result = std::system(command.c_str());
+void runTranscriber(const std::wstring& audioFilePath) {
+    std::wstring command = L"run_transcriber.bat " + audioFilePath;
+    int result = _wsystem(command.c_str());
     if (result == 0) {
-        MessageBoxA(NULL, "Transcription completed successfully.", "Info", MB_OK);
+        MessageBoxW(NULL, L"Transcription completed successfully.", L"Info", MB_OK);
     } else {
-        MessageBoxA(NULL, "Failed to transcribe the audio file.", "Error", MB_ICONERROR);
+        MessageBoxW(NULL, L"Failed to transcribe the audio file.", L"Error", MB_ICONERROR);
     }
 }
 
@@ -97,12 +97,12 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
         }
         case WM_COMMAND: {
             if (LOWORD(wParam) == 1) { // Start Download button clicked
-                std::string username = "your_username"; // Replace with actual username
-                std::string password = "your_password"; // Replace with actual password
+                std::wstring username = L"your_username"; // Replace with actual username
+                std::wstring password = L"your_password"; // Replace with actual password
                 loginToBroadcastify(username, password);
                 downloadFeedArchives(hWnd);
             } else if (LOWORD(wParam) == 2) { // Run Transcriber button clicked
-                std::string audioFilePath = "path_to_audio_file.wav"; // Replace with actual file path
+                std::wstring audioFilePath = L"path_to_audio_file.wav"; // Replace with actual file path
                 runTranscriber(audioFilePath);
             }
             return 0;
@@ -115,13 +115,13 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
-    WNDCLASS wc = {};
+    WNDCLASSW wc = {};
     wc.lpfnWndProc = MainWndProc;
     wc.hInstance = hInstance;
     wc.lpszClassName = L"FeedDownloaderClass";
     RegisterClass(&wc);
 
-    HWND hWnd = CreateWindow(
+    HWND hWnd = CreateWindowW(
         wc.lpszClassName,
         L"Feed Downloader",
         WS_OVERLAPPEDWINDOW,
@@ -133,7 +133,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
     );
 
     if (!hWnd) {
-        MessageBox(NULL, L"Failed to create the main window.", L"Error", MB_ICONERROR);
+        MessageBoxW(NULL, L"Failed to create the main window.", L"Error", MB_ICONERROR);
         return -1;
     }
 
