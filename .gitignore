@@ -167,3 +167,4 @@ build/ZERO_CHECK.vcxproj.filters
 .vs/FeedFetcher/FileContentIndex/bd416a2b-dd79-441a-9019-f0175d0ef8c9.vsidx
 .vs/FeedFetcher/FileContentIndex/d7e13533-5aad-434f-9bae-799f2851faf0.vsidx
 .vs/FeedFetcher/v17/.wsuo
+*.code-workspace
