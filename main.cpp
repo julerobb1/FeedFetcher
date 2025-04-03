@@ -23,8 +23,6 @@ std::string WStringToString(const std::wstring& wstr) {
     return str;
 }
 
-void loginToBroadcastify(LPCWSTR username, LPCWSTR password);
-
 void loginToBroadcastify(const std::string& username, const std::string& password) {
     std::string curlPath = "c:/Users/juler/Downloads/curl-8.12.1_4-win64-mingw/curl-8.12.1_4-win64-mingw/bin/curl.exe"; // Updated path
 
@@ -36,7 +34,7 @@ void loginToBroadcastify(const std::string& username, const std::string& passwor
     if (result == 0) {
         MessageBoxW(NULL, L"Login successful.", L"Info", MB_OK);
     } else {
-        MessageBoxA(NULL, "Failed to log in. Check your credentials.", "Error", MB_ICONERROR);
+        MessageBoxW(NULL, L"Failed to log in. Check your credentials.", L"Error", MB_ICONERROR);
     }
 }
 
