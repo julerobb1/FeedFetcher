@@ -1,3 +1,4 @@
+#define UNICODE
 #include <windows.h>
 #include <CommCtrl.h>
 #include <iostream>
@@ -14,18 +15,28 @@
 
 static HWND hProgressBar;
 
-void loginToBroadcastify(const std::wstring& username, const std::wstring& password) {
-    std::wstring curlPath = L"c:/Users/juler/Downloads/curl-8.12.1_4-win64-mingw/curl-8.12.1_4-win64-mingw/bin/curl.exe"; // Updated path
+// Helper function to convert std::wstring to LPCSTR
+std::string WStringToString(const std::wstring& wstr) {
+    int sizeNeeded = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, NULL, 0, NULL, NULL);
+    std::string str(sizeNeeded, 0);
+    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], sizeNeeded, NULL, NULL);
+    return str;
+}
 
-    std::wstring cookieFile = L"cookies.txt";
-    std::wstring loginUrl = L"https://www.broadcastify.com/login";
-    std::wstring command = curlPath + L" -c " + cookieFile + L" -d \"username=" + username + L"&password=" + password + L"\" " + loginUrl;
+void loginToBroadcastify(LPCWSTR username, LPCWSTR password);
 
-    int result = _wsystem(command.c_str());
+void loginToBroadcastify(const std::string& username, const std::string& password) {
+    std::string curlPath = "c:/Users/juler/Downloads/curl-8.12.1_4-win64-mingw/curl-8.12.1_4-win64-mingw/bin/curl.exe"; // Updated path
+
+    std::string cookieFile = "cookies.txt";
+    std::string loginUrl = "https://www.broadcastify.com/login";
+    std::string command = curlPath + " -c " + cookieFile + " -d \"username=" + username + "&password=" + password + "\" " + loginUrl;
+
+    int result = std::system(command.c_str());
     if (result == 0) {
         MessageBoxW(NULL, L"Login successful.", L"Info", MB_OK);
     } else {
-        MessageBoxW(NULL, L"Failed to log in. Check your credentials.", L"Error", MB_ICONERROR);
+        MessageBoxA(NULL, "Failed to log in. Check your credentials.", "Error", MB_ICONERROR);
     }
 }
 
@@ -65,8 +76,8 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
             icex.dwICC = ICC_PROGRESS_CLASS;
             InitCommonControlsEx(&icex);
 
-            hProgressBar = CreateWindowEx(
-                0, PROGRESS_CLASS, NULL,
+            hProgressBar = CreateWindowExW(
+                0, PROGRESS_CLASSW, NULL,
                 WS_CHILD | WS_VISIBLE | PBS_SMOOTH,
                 10, 50, 300, 30,
                 hWnd, (HMENU)IDC_PROGRESS,
@@ -76,8 +87,8 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
             SendMessage(hProgressBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
             SendMessage(hProgressBar, PBM_SETPOS, 0, 0);
 
-            CreateWindow(
-                TEXT("BUTTON"), TEXT("Start Download"),
+            CreateWindowW(
+                L"BUTTON", L"Start Download",
                 WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
                 10, 10, 120, 30,
                 hWnd, (HMENU)1,
@@ -85,8 +96,8 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 NULL
             );
 
-            CreateWindow(
-                TEXT("BUTTON"), TEXT("Run Transcriber"),
+            CreateWindowW(
+                L"BUTTON", L"Run Transcriber",
                 WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
                 140, 10, 120, 30,
                 hWnd, (HMENU)2,
@@ -99,7 +110,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
             if (LOWORD(wParam) == 1) { // Start Download button clicked
                 std::wstring username = L"your_username"; // Replace with actual username
                 std::wstring password = L"your_password"; // Replace with actual password
-                loginToBroadcastify(username, password);
+                loginToBroadcastify(WStringToString(username), WStringToString(password));
                 downloadFeedArchives(hWnd);
             } else if (LOWORD(wParam) == 2) { // Run Transcriber button clicked
                 std::wstring audioFilePath = L"path_to_audio_file.wav"; // Replace with actual file path
@@ -111,7 +122,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
             PostQuitMessage(0);
             return 0;
     }
-    return DefWindowProc(hWnd, msg, wParam, lParam);
+    return DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
@@ -119,11 +130,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
     wc.lpfnWndProc = MainWndProc;
     wc.hInstance = hInstance;
     wc.lpszClassName = L"FeedDownloaderClass";
-    RegisterClass(&wc);
+    RegisterClassW(&wc);
 
     HWND hWnd = CreateWindowW(
         wc.lpszClassName,
-        L"Feed Downloader",
+        L"Feed Downloader", // Wide-character string
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT,
         350, 150,
@@ -136,6 +147,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
         MessageBoxW(NULL, L"Failed to create the main window.", L"Error", MB_ICONERROR);
         return -1;
     }
+
+    MessageBoxW(NULL, L"Login successful.", L"Info", MB_OK);
 
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
