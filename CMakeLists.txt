@@ -8,7 +8,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Add executable
-file(GLOB SOURCES "*.cpp")
+set(SOURCES
+    app_logic.cpp
+    feed_fetcher.cpp
+    main.cpp
+    # Add other source files here
+)
 add_executable(Mp3Combiner ${SOURCES})
 
 # Link required libraries

@@ -9,6 +9,9 @@ public:
     std::vector<std::string> getFeedUrls();
     std::vector<char> downloadFeed(const std::string& url);
 
+    void downloadFeedArchives();
+    void loginToBroadcastify(const std::string& username, const std::string& password);
+
 private:
     std::string username;
     std::string password;

@@ -158,3 +158,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
     }
     return (int)msg.wParam;
 }
+
+int main() {
+    // Main application logic
+    return 0;
+}

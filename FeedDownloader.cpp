@@ -62,3 +62,7 @@ void FeedDownloader::downloadFeed(const std::string& url, const std::string& out
         std::cerr << "Failed to download feed from URL: " << url << std::endl;
     }
 }
+
+// In a header file (functions.h)
+void downloadFeedArchives();
+void loginToBroadcastify(const std::string& username, const std::string& password);
