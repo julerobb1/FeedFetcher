@@ -1,11 +1,7 @@
 #define UNICODE
 #include <windows.h>
 #include <CommCtrl.h>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <fstream>
-#include <cstdlib>
+#include "app_logic.h" // Include shared declarations
 
 #pragma comment(lib, "Comctl32.lib")
 
@@ -81,6 +77,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 hWnd, (HMENU)IDC_PROGRESS,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
+                
             );
             SendMessage(hProgressBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
             SendMessage(hProgressBar, PBM_SETPOS, 0, 0);
@@ -106,13 +103,8 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
         }
         case WM_COMMAND: {
             if (LOWORD(wParam) == 1) { // Start Download button clicked
-                std::wstring username = L"your_username"; // Replace with actual username
-                std::wstring password = L"your_password"; // Replace with actual password
-                loginToBroadcastify(WStringToString(username), WStringToString(password));
-                downloadFeedArchives(hWnd);
-            } else if (LOWORD(wParam) == 2) { // Run Transcriber button clicked
-                std::wstring audioFilePath = L"path_to_audio_file.wav"; // Replace with actual file path
-                runTranscriber(audioFilePath);
+                loginToBroadcastify("your_username", "your_password");
+                downloadFeedArchives();
             }
             return 0;
         }

@@ -1,10 +1,10 @@
+#include "app_logic.h"
 #include <iostream>
 #include <cstdlib>
 #include <string>
 
 void loginToBroadcastify(const std::string& username, const std::string& password) {
-    std::string curlPath = "third_party/curl/x64/curl.exe"; // Hardcoded to 64-bit curl
-
+    std::string curlPath = "third_party/curl/x64/curl.exe";
     std::string cookieFile = "cookies.txt";
     std::string loginUrl = "https://www.broadcastify.com/login";
     std::string command = curlPath + " -c " + cookieFile + " -d \"username=" + username + "&password=" + password + "\" " + loginUrl;
@@ -18,8 +18,7 @@ void loginToBroadcastify(const std::string& username, const std::string& passwor
 }
 
 void downloadFeedArchives() {
-    std::string curlPath = "third_party/curl/x64/curl.exe"; // Hardcoded to 64-bit curl
-
+    std::string curlPath = "third_party/curl/x64/curl.exe";
     std::string feedUrl = "https://example.com/user/feeds/today";
     std::string outputFile = "archives/feed_archive.zip";
     std::string command = curlPath + " -o " + outputFile + " " + feedUrl;
