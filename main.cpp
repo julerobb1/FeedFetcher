@@ -1,7 +1,10 @@
 #define UNICODE
 #include <windows.h>
 #include <CommCtrl.h>
+#include <iostream>
 #include "app_logic.h" // Include shared declarations
+#include <cstdlib>
+#include <string>
 
 #pragma comment(lib, "Comctl32.lib")
 
@@ -9,56 +12,55 @@
 #define IDC_PROGRESS 1002
 #endif
 
+
 static HWND hProgressBar;
 
-// Helper function to convert std::wstring to LPCSTR
-std::string WStringToString(const std::wstring& wstr) {
-    int sizeNeeded = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, NULL, 0, NULL, NULL);
-    std::string str(sizeNeeded, 0);
-    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], sizeNeeded, NULL, NULL);
-    return str;
-}
+// Function to check if the system supports graphical UI
+bool isGraphicalEnvironment() {
+    OSVERSIONINFOEXW osvi = {};
+    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEXW);
+    GetVersionExW((OSVERSIONINFOW*)&osvi);
 
-void loginToBroadcastify(const std::string& username, const std::string& password) {
-    std::string curlPath = "c:/Users/juler/Downloads/curl-8.12.1_4-win64-mingw/curl-8.12.1_4-win64-mingw/bin/curl.exe"; // Updated path
-
-    std::string cookieFile = "cookies.txt";
-    std::string loginUrl = "https://www.broadcastify.com/login";
-    std::string command = curlPath + " -c " + cookieFile + " -d \"username=" + username + "&password=" + password + "\" " + loginUrl;
-
-    int result = std::system(command.c_str());
-    if (result == 0) {
-        MessageBoxW(NULL, L"Login successful.", L"Info", MB_OK);
-    } else {
-        MessageBoxW(NULL, L"Failed to log in. Check your credentials.", L"Error", MB_ICONERROR);
+    // Check if the OS is a server version (e.g., Windows Server)
+    if (osvi.wProductType == VER_NT_SERVER) {
+        return false; // Assume no graphical environment for server OS
     }
+
+    // Additional checks for graphical environment can be added here
+    return true;
 }
 
-void downloadFeedArchives(HWND hWnd) {
-    std::wstring curlPath = L"c:/Users/juler/Downloads/curl-8.12.1_4-win64-mingw/curl-8.12.1_4-win64-mingw/bin/curl.exe"; // Updated path
+// Forward declaration for runFFmpeg
+void runFFmpeg(const std::wstring& inputFile, const std::wstring& outputFile);
 
-    std::wstring feedUrl = L"https://example.com/user/feeds/today";
-    std::wstring outputFile = L"archives/feed_archive.zip";
-    std::wstring command = curlPath + L" -o " + outputFile + L" " + feedUrl;
-
-    SendMessage(hProgressBar, PBM_SETPOS, 50, 0); // Update progress bar to 50%
-
-    int result = _wsystem(command.c_str());
-    if (result == 0) {
-        SendMessage(hProgressBar, PBM_SETPOS, 100, 0); // Update progress bar to 100%
-        MessageBoxW(hWnd, L"Feed archives downloaded successfully.", L"Success", MB_OK);
-    } else {
-        MessageBoxW(hWnd, L"Failed to download feed archives.", L"Error", MB_ICONERROR);
+void runTextUI(int argc, wchar_t* argv[]) {
+    if (argc < 3) {
+        std::wcerr << L"Usage: Mp3Combiner.exe <broadcastify_feed_url> <output_file> [file1 file2 ...] [--transcribe]\n";
+        return;
     }
-}
 
-void runTranscriber(const std::wstring& audioFilePath) {
-    std::wstring command = L"run_transcriber.bat " + audioFilePath;
-    int result = _wsystem(command.c_str());
-    if (result == 0) {
-        MessageBoxW(NULL, L"Transcription completed successfully.", L"Info", MB_OK);
-    } else {
-        MessageBoxW(NULL, L"Failed to transcribe the audio file.", L"Error", MB_ICONERROR);
+    std::wstring feedUrl = argv[1];
+    std::wstring outputFile = argv[2];
+    std::vector<std::wstring> inputFiles;
+    bool transcribe = false;
+
+    for (int i = 3; i < argc; ++i) {
+        if (std::wstring(argv[i]) == L"--transcribe") {
+            transcribe = true;
+        } else {
+            inputFiles.push_back(argv[i]);
+        }
+    }
+
+    // Perform operations
+    downloadFeedArchives(NULL, NULL, feedUrl);
+    if (!inputFiles.empty()) {
+        combineFiles(outputFile, inputFiles);
+    }
+    if (transcribe) {
+        std::wstring wavFile = L"transcribed_" + outputFile + L".wav";
+        runFFmpeg(outputFile, wavFile); // Convert to WAV format
+        runTranscriber(wavFile);       // Pass the WAV file to the transcriber
     }
 }
 
@@ -77,7 +79,6 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 hWnd, (HMENU)IDC_PROGRESS,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
-                
             );
             SendMessage(hProgressBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
             SendMessage(hProgressBar, PBM_SETPOS, 0, 0);
@@ -103,8 +104,8 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
         }
         case WM_COMMAND: {
             if (LOWORD(wParam) == 1) { // Start Download button clicked
-                loginToBroadcastify("your_username", "your_password");
-                downloadFeedArchives();
+                loginToBroadcastify();
+                downloadFeedArchives(hWnd, hProgressBar, L"https://www.broadcastify.com/archives/feed/39972");
             }
             return 0;
         }
@@ -115,43 +116,124 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
     return DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
-    WNDCLASSW wc = {};
-    wc.lpfnWndProc = MainWndProc;
-    wc.hInstance = hInstance;
-    wc.lpszClassName = L"FeedDownloaderClass";
-    RegisterClassW(&wc);
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpCmdLine, int nCmdShow) {
+    int argc;
+    LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 
-    HWND hWnd = CreateWindowW(
-        wc.lpszClassName,
-        L"Feed Downloader", // Wide-character string
-        WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT,
-        350, 150,
-        NULL, NULL,
-        hInstance,
-        NULL
-    );
+    if (isGraphicalEnvironment()) {
+        WNDCLASSW wc = {};
+        wc.lpfnWndProc = MainWndProc;
+        wc.hInstance = hInstance;
+        wc.lpszClassName = L"FeedDownloaderClass";
+        RegisterClassW(&wc);
 
-    if (!hWnd) {
-        MessageBoxW(NULL, L"Failed to create the main window.", L"Error", MB_ICONERROR);
-        return -1;
+        HWND hWnd = CreateWindowW(
+            wc.lpszClassName,
+            L"Feed Downloader", // Wide-character string
+            WS_OVERLAPPEDWINDOW,
+            CW_USEDEFAULT, CW_USEDEFAULT,
+            350, 150,
+            NULL, NULL,
+            hInstance,
+            NULL
+        );
+
+        if (!hWnd) {
+            MessageBoxW(NULL, L"Failed to create the main window.", L"Error", MB_ICONERROR);
+            return -1;
+        }
+
+        ShowWindow(hWnd, nCmdShow);
+        UpdateWindow(hWnd);
+
+        MSG msg;
+        while (GetMessage(&msg, NULL, 0, 0)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+    } else {
+        while (true) {
+            std::wcout << L"Select an action:\n";
+            std::wcout << L"1. Download Feed Archives\n";
+            std::wcout << L"2. Transcribe Audio\n";
+            std::wcout << L"3. Exit\n";
+            std::wcout << L"Enter your choice: ";
+
+            int choice;
+            std::wcin >> choice;
+
+            if (choice == 1) {
+                std::wstring feedUrl;
+                std::wcout << L"Enter the Broadcastify feed URL: ";
+                std::wcin.ignore(); // Clear newline from input buffer
+                std::getline(std::wcin, feedUrl);
+
+                loginToBroadcastify();
+                downloadFeedArchives(NULL, NULL, feedUrl);
+            } else if (choice == 2) {
+                std::wstring inputFile, outputFile;
+                std::wcout << L"Enter the input audio file path: ";
+                std::wcin.ignore(); // Clear newline from input buffer
+                std::getline(std::wcin, inputFile);
+
+                std::wcout << L"Enter the output WAV file path: ";
+                std::getline(std::wcin, outputFile);
+
+                runFFmpeg(inputFile, outputFile);
+                runTranscriber(outputFile);
+            } else if (choice == 3) {
+                std::wcout << L"Exiting program.\n";
+                break;
+            } else {
+                std::wcout << L"Invalid choice. Please try again.\n";
+            }
+        }
     }
 
-    MessageBoxW(NULL, L"Login successful.", L"Info", MB_OK);
-
-    ShowWindow(hWnd, nCmdShow);
-    UpdateWindow(hWnd);
-
-    MSG msg;
-    while (GetMessage(&msg, NULL, 0, 0)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
-    return (int)msg.wParam;
+    return 0;
 }
 
-int main() {
-    // Main application logic
-    return 0;
+void runFFmpeg(const std::wstring& inputFile, const std::wstring& outputFile) {
+    std::wstring ffmpegPath = L"Z:\\Github\\FeedFetcher\\bin\\ffmpeg.exe";
+    std::wstring command = L"\"" + ffmpegPath + L"\" -i \"" + inputFile + L"\" \"" + outputFile + L"\"";
+    int result = _wsystem(command.c_str());
+    if (result != 0) {
+        std::wcerr << L"FFmpeg command failed with error code: " << result << std::endl;
+    }
+}
+
+void downloadFeedArchives(HWND hWnd, HWND hProgressBar, const std::wstring& feedUrl) {
+    std::wstring curlPath = L"Z:\\Github\\FeedFetcher\\bin\\curl.exe";
+    std::wstring outputFile = L"feed_archive.zip";
+    std::wstring command = L"\"" + curlPath + L"\" -L -o \"" + outputFile + L"\" \"" + feedUrl + L"\"";
+
+    int result = _wsystem(command.c_str());
+    if (result != 0) {
+        MessageBoxW(hWnd, L"Failed to download feed archives.", L"Error", MB_ICONERROR);
+    } else {
+        MessageBoxW(hWnd, L"Feed archives downloaded successfully.", L"Info", MB_ICONINFORMATION);
+    }
+}
+
+void loginToBroadcastify() {
+    std::wstring username, password;
+
+    // Prompt user for username
+    std::wcout << L"Enter your Broadcastify username: ";
+    std::getline(std::wcin, username);
+
+    // Prompt user for password
+    std::wcout << L"Enter your Broadcastify password: ";
+    std::getline(std::wcin, password);
+
+    std::wstring curlPath = L"Z:\\Github\\FeedFetcher\\bin\\curl.exe";
+    std::wstring loginUrl = L"https://www.broadcastify.com/login/";
+    std::wstring command = L"\"" + curlPath + L"\" -L -d \"username=" + username + L"&password=" + password + L"\" \"" + loginUrl + L"\"";
+
+    int result = _wsystem(command.c_str());
+    if (result != 0) {
+        MessageBoxW(NULL, L"Failed to log in to Broadcastify.", L"Error", MB_ICONERROR);
+    } else {
+        MessageBoxW(NULL, L"Login successful.", L"Info", MB_ICONINFORMATION);
+    }
 }
