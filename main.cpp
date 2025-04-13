@@ -18,6 +18,9 @@
 #define IDC_PROGRESS 1002
 #endif
 
+// Forward declaration for crawlArchiveDates
+std::vector<std::wstring> crawlArchiveDates(const std::wstring& baseUrl);
+
 
 static HWND hProgressBar;
 
@@ -218,19 +221,6 @@ void runFFmpeg(const std::wstring& inputFile, const std::wstring& outputFile) {
     int result = _wsystem(command.c_str());
     if (result != 0) {
         std::wcerr << L"FFmpeg command failed with error code: " << result << std::endl;
-    }
-}
-
-void downloadFeedArchives(HWND hWnd, HWND hProgressBar, const std::wstring& feedUrl) {
-    std::wstring curlPath = L"Z:\\Github\\FeedFetcher\\bin\\curl.exe";
-    std::wstring outputFile = L"feed_archive.zip";
-    std::wstring command = L"\"" + curlPath + L"\" -L -o \"" + outputFile + L"\" \"" + feedUrl + L"\"";
-
-    int result = _wsystem(command.c_str());
-    if (result != 0) {
-        MessageBoxW(hWnd, L"Failed to download feed archives.", L"Error", MB_ICONERROR);
-    } else {
-        MessageBoxW(hWnd, L"Feed archives downloaded successfully.", L"Info", MB_ICONINFORMATION);
     }
 }
 
