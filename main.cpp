@@ -18,9 +18,10 @@
 #define IDC_PROGRESS 1002
 #endif
 
-// Forward declaration for crawlArchiveDates
+// Forward declarations
 std::vector<std::wstring> crawlArchiveDates(const std::wstring& baseUrl);
-
+void runFFmpeg(const std::wstring& inputFile, const std::wstring& outputFile);
+void presentDateMenu(const std::wstring& baseUrl); // Added forward declaration
 
 static HWND hProgressBar;
 
@@ -206,6 +207,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpCmdLine, int nCmdShow
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
 
+    // Call the graphical interface from app_logic.cpp
+    //    presentOptions(hWnd); // Commented out as the function is undefined
+    
+
+    std::wstring baseUrl = L"https://www.broadcastify.com/archives/feed/"; // Replace with actual base URL
+    presentDateMenu(baseUrl);
+
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0)) {
         TranslateMessage(&msg);
@@ -216,7 +224,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpCmdLine, int nCmdShow
 }
 
 void runFFmpeg(const std::wstring& inputFile, const std::wstring& outputFile) {
-    std::wstring ffmpegPath = L"Z:\\Github\\FeedFetcher\\bin\\ffmpeg.exe";
+    std::wstring ffmpegPath = L"bin\\ffmpeg.exe"; // Updated path
     std::wstring command = L"\"" + ffmpegPath + L"\" -i \"" + inputFile + L"\" \"" + outputFile + L"\"";
     int result = _wsystem(command.c_str());
     if (result != 0) {
@@ -224,53 +232,8 @@ void runFFmpeg(const std::wstring& inputFile, const std::wstring& outputFile) {
     }
 }
 
-void loginToBroadcastify() {
-    std::wstring username, password;
-
-    // Prompt user for username
-    std::wcout << L"Enter your Broadcastify username: ";
-    std::getline(std::wcin, username);
-
-    // Prompt user for password
-    std::wcout << L"Enter your Broadcastify password: ";
-    std::getline(std::wcin, password);
-
-    // Get the directory of the executable
-    wchar_t exePath[MAX_PATH];
-    GetModuleFileNameW(NULL, exePath, MAX_PATH);
-    PathRemoveFileSpecW(exePath);
-
-    // Construct the path to curl.exe
-    wchar_t curlPath[MAX_PATH];
-    PathCombineW(curlPath, exePath, L"bin\\curl.exe");
-
-    std::wstring loginUrl = L"https://www.broadcastify.com/login/";
-    std::wstring command = L"\"" + std::wstring(curlPath) + L"\" -L -d \"username=" + username + L"&password=" + password + L"\" \"" + loginUrl + L"\"";
-
-    // Run curl and capture output
-    FILE* pipe = _wpopen(command.c_str(), L"r");
-    if (!pipe) {
-        MessageBoxW(NULL, L"Failed to execute curl command.", L"Error", MB_ICONERROR);
-        return;
-    }
-
-    std::wstring response;
-    wchar_t buffer[128];
-    while (fgetws(buffer, 128, pipe)) {
-        response += buffer;
-    }
-    _pclose(pipe);
-
-    // Check if login was successful
-    if (response.find(L"Login successful") != std::wstring::npos || response.find(L"Welcome") != std::wstring::npos) {
-        MessageBoxW(NULL, L"Login successful.", L"Info", MB_ICONINFORMATION);
-    } else {
-        MessageBoxW(NULL, L"Login failed. Please check your credentials.", L"Error", MB_ICONERROR);
-    }
-}
-
 std::vector<std::wstring> crawlArchiveDates(const std::wstring& baseUrl) {
-    std::wstring curlPath = L"Z:\\Github\\FeedFetcher\\bin\\curl.exe";
+    std::wstring curlPath = L"bin\\curl.exe"; // Updated path
     std::wstring command = L"\"" + curlPath + L"\" -L \"" + baseUrl + L"\"";
     std::wstring output;
 
