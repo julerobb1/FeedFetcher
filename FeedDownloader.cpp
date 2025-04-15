@@ -65,4 +65,18 @@ void FeedDownloader::downloadFeed(const std::string& url, const std::string& out
 
 // In a header file (functions.h)
 void downloadFeedArchives();
-void loginToBroadcastify(const std::string& username, const std::string& password);
+
+void downloadFeedArchives() {
+    FeedDownloader downloader("your_username", "your_password"); // Replace with actual credentials
+    std::vector<std::string> feedUrls = downloader.getFeedUrls();
+
+    if (feedUrls.empty()) {
+        std::cerr << "No feed URLs found to download." << std::endl;
+        return;
+    }
+
+    for (size_t i = 0; i < feedUrls.size(); ++i) {
+        std::string outputFilePath = "feed_" + std::to_string(i) + ".mp3"; // Example output file naming
+        downloader.downloadFeed(feedUrls[i], outputFilePath);
+    }
+}

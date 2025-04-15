@@ -10,7 +10,8 @@ public:
     std::vector<char> downloadFeed(const std::string& url);
 
     void downloadFeedArchives();
-    void loginToBroadcastify(const std::string& username, const std::string& password);
+    // Removed loginToBroadcastify declaration
+    // void loginToBroadcastify(const std::string& username, const std::string& password);
 
 private:
     std::string username;
