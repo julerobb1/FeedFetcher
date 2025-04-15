@@ -181,6 +181,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
     return DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
+#ifdef GRAPHICAL_MODE
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpCmdLine, int nCmdShow) {
     WNDCLASSW wc = {};
     wc.lpfnWndProc = MainWndProc;
@@ -207,11 +208,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpCmdLine, int nCmdShow
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
 
-    // Call the graphical interface from app_logic.cpp
-    //    presentOptions(hWnd); // Commented out as the function is undefined
-    
-
-    std::wstring baseUrl = L"https://www.broadcastify.com/archives/feed/"; // Replace with actual base URL
+    std::wstring baseUrl = L"https://www.broadcastify.com/archives/feed/";
     presentDateMenu(baseUrl);
 
     MSG msg;
@@ -222,6 +219,42 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpCmdLine, int nCmdShow
 
     return 0;
 }
+#else
+int main(int argc, char* argv[]) {
+    std::cout << "Mp3Combiner is running in console mode!" << std::endl;
+
+    if (argc < 3) {
+        std::cerr << "Usage: Mp3Combiner.exe <broadcastify_feed_url> <output_file> [file1 file2 ...] [--transcribe]\n";
+        return 1;
+    }
+
+    std::string feedUrl = argv[1];
+    std::string outputFile = argv[2];
+    std::vector<std::string> inputFiles;
+    bool transcribe = false;
+
+    for (int i = 3; i < argc; ++i) {
+        if (std::string(argv[i]) == "--transcribe") {
+            transcribe = true;
+        } else {
+            inputFiles.push_back(argv[i]);
+        }
+    }
+
+    // Perform operations
+    // downloadFeedArchives(NULL, NULL, feedUrl); // Uncomment and implement if needed
+    if (!inputFiles.empty()) {
+        // combineFiles(outputFile, inputFiles); // Uncomment and implement if needed
+    }
+    if (transcribe) {
+        std::string wavFile = "transcribed_" + outputFile + ".wav";
+        // runFFmpeg(outputFile, wavFile); // Uncomment and implement if needed
+        // runTranscriber(wavFile);       // Uncomment and implement if needed
+    }
+
+    return 0;
+}
+#endif
 
 void runFFmpeg(const std::wstring& inputFile, const std::wstring& outputFile) {
     std::wstring ffmpegPath = L"bin\\ffmpeg.exe"; // Updated path

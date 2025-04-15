@@ -27,24 +27,24 @@ set(ROOT_HEADERS
 
 # Include files from the bin directory
 set(BIN_FILES
-    bin/curl.exe
-    bin/ffmpeg.exe
-    bin/ffplay.exe
-    bin/ffprobe.exe
-    bin/libcurl-x64.dll
-    bin/curl-ca-bundle.crt
-    bin/bkg-demo.jpg
+    ${CMAKE_SOURCE_DIR}/bin/curl.exe
+    ${CMAKE_SOURCE_DIR}/bin/ffmpeg.exe
+    ${CMAKE_SOURCE_DIR}/bin/ffplay.exe
+    ${CMAKE_SOURCE_DIR}/bin/ffprobe.exe
+    ${CMAKE_SOURCE_DIR}/bin/libcurl-x64.dll
+    ${CMAKE_SOURCE_DIR}/bin/curl-ca-bundle.crt
+    ${CMAKE_SOURCE_DIR}/bin/bkg-demo.jpg
 )
 
 # Include Python scripts
 set(PYTHON_SCRIPTS
-    python_scripts/transcriber.py
+    ${CMAKE_SOURCE_DIR}/python_scripts/transcriber.py
 )
 
 # Include JPEG files
 set(JPEG_FILES
-    assets/image1.jpeg
-    assets/image2.jpeg
+    ${CMAKE_SOURCE_DIR}/assets/image1.jpeg
+    ${CMAKE_SOURCE_DIR}/assets/image2.jpeg
 )
 
 # Add executable for the project
@@ -54,7 +54,7 @@ add_executable(Mp3Combiner ${ROOT_SOURCES} ${ROOT_HEADERS})
 add_custom_command(TARGET Mp3Combiner POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${BIN_FILES} $<TARGET_FILE_DIR:Mp3Combiner>
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PYTHON_SCRIPTS} $<TARGET_FILE_DIR:Mp3Combiner>
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${JPG_FILES} $<TARGET_FILE_DIR:Mp3Combiner>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${JPEG_FILES} $<TARGET_FILE_DIR:Mp3Combiner>
 )
 
 # Link required libraries
