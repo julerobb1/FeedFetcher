@@ -10,6 +10,7 @@
 #include <sstream>
 #include <set>
 #include <shlwapi.h> // For PathCombine
+#include <shellapi.h>
 #pragma comment(lib, "Shlwapi.lib")
 
 #pragma comment(lib, "Comctl32.lib")
@@ -74,8 +75,79 @@ void runTextUI(int argc, wchar_t* argv[]) {
     }
 }
 
+bool CheckAndInstallPythonModules() {
+    // Check if Python is installed
+    if (system("python --version") != 0) {
+        MessageBox(NULL, L"Python is not installed or not added to the system PATH. Please install Python and try again.", L"Error", MB_ICONERROR);
+        return false;
+    }
+
+    // Check and install required Python modules
+    std::wstring command = L"python -m pip install --upgrade pip && python -m pip install pydub pocketsphinx openai-whisper ffmpeg-python";
+    int result = system(std::string(command.begin(), command.end()).c_str());
+
+    if (result != 0) {
+        MessageBox(NULL, L"Failed to install required Python modules. Please check your Python installation and try again.", L"Error", MB_ICONERROR);
+        return false;
+    }
+
+    MessageBox(NULL, L"Required Python modules have been successfully installed.", L"Success", MB_ICONINFORMATION);
+    return true;
+}
+
+void OnTranscribeButtonClick(const std::wstring& inputFile, bool trimSilence) {
+    // Ensure Python modules are installed
+    if (!CheckAndInstallPythonModules()) {
+        return;
+    }
+
+    // Decide engine based on system specifications
+    std::wstring engine = L"pocketsphinx"; // Default to PocketSphinx
+    SYSTEM_INFO sysInfo;
+    GetSystemInfo(&sysInfo);
+
+    // Check for GPU (basic heuristic)
+    if (sysInfo.dwNumberOfProcessors >= 4) {
+        engine = L"whisper"; // Use Whisper if the system is powerful
+    }
+
+    // Add silence trimming flag if selected
+    std::wstring command = L"python transcribe.py " + engine + L" " + inputFile;
+    if (trimSilence) {
+        command += L" --trim-silence";
+    }
+
+    ShellExecute(NULL, L"open", L"cmd.exe", (L"/C " + command).c_str(), NULL, SW_SHOWNORMAL);
+}
+
+void OnCombineButtonClick(const std::vector<std::wstring>& inputFiles, const std::wstring& outputFile) {
+    // Combine files using FFmpeg
+    std::wstringstream command;
+    command << L"ffmpeg -y -i \"concat:";
+    for (size_t i = 0; i < inputFiles.size(); ++i) {
+        command << inputFiles[i];
+        if (i < inputFiles.size() - 1) {
+            command << L"|";
+        }
+    }
+    command << L"\" -c copy " << outputFile;
+
+    ShellExecute(NULL, L"open", L"cmd.exe", (L"/C " + command.str()).c_str(), NULL, SW_SHOWNORMAL);
+}
+
+void LoadCustomBackground(HWND hwnd) {
+    // Load the custom background
+    HBITMAP hBitmap = (HBITMAP)LoadImage(NULL, L"background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    if (hBitmap) {
+        // Set the background
+        SendMessage(hwnd, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
+    } else {
+        std::cerr << "Failed to load background image." << std::endl;
+    }
+}
+
 LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    static HWND hBaseUrlEdit, hDateList, hDownloadButton, hTranscribeButton;
+    static HWND hBaseUrlEdit, hDateList, hDownloadButton, hTranscribeButton, hCombineButton, hTrimSilenceCheckbox;
 
     switch (msg) {
         case WM_CREATE: {
@@ -139,6 +211,26 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 NULL
             );
 
+            // Create a checkbox for silence trimming
+            hTrimSilenceCheckbox = CreateWindowW(
+                L"BUTTON", L"Trim Silence",
+                WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX,
+                10, 190, 120, 20,
+                hWnd, (HMENU)4,
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                NULL
+            );
+
+            // Create a button to combine files
+            hCombineButton = CreateWindowW(
+                L"BUTTON", L"Combine Files",
+                WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+                140, 190, 120, 30,
+                hWnd, (HMENU)5,
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                NULL
+            );
+
             return 0;
         }
         case WM_COMMAND: {
@@ -170,7 +262,17 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                     }
                 }
             } else if (LOWORD(wParam) == 3) { // Transcribe button clicked
-                MessageBoxW(hWnd, L"Transcription feature is not yet implemented.", L"Info", MB_ICONINFORMATION);
+                wchar_t inputFile[512];
+                GetWindowTextW(hBaseUrlEdit, inputFile, 512);
+
+                // Check if silence trimming is selected
+                bool trimSilence = SendMessageW(hTrimSilenceCheckbox, BM_GETCHECK, 0, 0) == BST_CHECKED;
+
+                OnTranscribeButtonClick(inputFile, trimSilence);
+            } else if (LOWORD(wParam) == 5) { // Combine button clicked
+                std::vector<std::wstring> inputFiles = {L"file1.mp3", L"file2.mp3"}; // Example files
+                std::wstring outputFile = L"combined.mp3";
+                OnCombineButtonClick(inputFiles, outputFile);
             }
             return 0;
         }

@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Z:\Github\FeedFetcher\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Z:\Github\FeedFetcher\app_logic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Z:\Github\FeedFetcher\AudioAnalyzer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Z:\Github\FeedFetcher\CLoginDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Z:\Github\FeedFetcher\FeedDownloader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Z:\Github\FeedFetcher\app_logic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Z:\Github\FeedFetcher\AudioAnalyzer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Z:\Github\FeedFetcher\CLoginDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Z:\Github\FeedFetcher\FeedDownloader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Z:\Github\FeedFetcher\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="Z:\Github\FeedFetcher\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{C0AA1D7E-A948-3E8A-BA31-8EAC8E156309}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{802D26FB-FB53-3FAA-BEAD-B12FFF33C86A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,3 @@
+Z:/Github/FeedFetcher/FeedFetcher/build/CMakeFiles/FeedFetcher_1.dir
+Z:/Github/FeedFetcher/FeedFetcher/build/CMakeFiles/ALL_BUILD.dir
+Z:/Github/FeedFetcher/FeedFetcher/build/CMakeFiles/ZERO_CHECK.dir

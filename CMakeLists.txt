@@ -1,11 +1,19 @@
 cmake_minimum_required(VERSION 3.15)
 
 # Project name
-project(Mp3Combiner)
+project(FeedFetcher)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Option to enable graphical mode
+option(GRAPHICAL_MODE "Enable graphical mode" ON)
+
+# Define build number (can be passed via command line or default to 1)
+if(NOT DEFINED BUILD_NUMBER)
+    set(BUILD_NUMBER 1)
+endif()
 
 # Include necessary source files from the root directory
 set(ROOT_SOURCES
@@ -43,19 +51,41 @@ set(PYTHON_SCRIPTS
 
 # Include JPEG files
 set(JPEG_FILES
-    ${CMAKE_SOURCE_DIR}/assets/image1.jpeg
-    ${CMAKE_SOURCE_DIR}/assets/image2.jpeg
+    ${CMAKE_SOURCE_DIR}/assets/bkg-demo.jpeg
 )
 
-# Add executable for the project
-add_executable(Mp3Combiner ${ROOT_SOURCES} ${ROOT_HEADERS})
+# Set executable name with build number
+set(EXECUTABLE_NAME "FeedFetcher_${BUILD_NUMBER}")
 
-# Add custom commands to copy runtime dependencies after Mp3Combiner is built
-add_custom_command(TARGET Mp3Combiner POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${BIN_FILES} $<TARGET_FILE_DIR:Mp3Combiner>
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PYTHON_SCRIPTS} $<TARGET_FILE_DIR:Mp3Combiner>
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${JPEG_FILES} $<TARGET_FILE_DIR:Mp3Combiner>
+# Add executable for the project
+add_executable(${EXECUTABLE_NAME} ${ROOT_SOURCES} ${ROOT_HEADERS})
+
+# Pass GRAPHICAL_MODE definition to the compiler if enabled
+if(GRAPHICAL_MODE)
+    target_compile_definitions(${EXECUTABLE_NAME} PRIVATE GRAPHICAL_MODE)
+    # Set the subsystem to WINDOWS for graphical mode
+    set_target_properties(${EXECUTABLE_NAME} PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS")
+else()
+    # Set the subsystem to CONSOLE for console mode
+    set_target_properties(${EXECUTABLE_NAME} PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
+endif()
+
+# Add custom commands to copy runtime dependencies after FeedFetcher is built
+add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${BIN_FILES} $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PYTHON_SCRIPTS} $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${JPEG_FILES} $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
 )
 
 # Link required libraries
-target_link_libraries(Mp3Combiner Comctl32)
+target_link_libraries(${EXECUTABLE_NAME} Comctl32)
+
+# Include Python script as a resource
+add_custom_command(
+    TARGET ${EXECUTABLE_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/transcribe.py ${CMAKE_BINARY_DIR}/transcribe.py
+)
+
+# Add custom background as a resource
+set(RESOURCE_FILES ${CMAKE_SOURCE_DIR}/background.bmp)
+source_group("Resources" FILES ${RESOURCE_FILES})
