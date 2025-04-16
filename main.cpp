@@ -191,9 +191,18 @@ void LoadCustomBackground(HWND hwnd) {
     HBITMAP hBitmap = (HBITMAP)LoadImage(NULL, L"background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     if (hBitmap) {
         // Set the background
-        SendMessage(hwnd, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
+        HWND hStatic = CreateWindowW(
+            L"STATIC", 
+            NULL, 
+            WS_VISIBLE | WS_CHILD | SS_BITMAP,
+            0, 0, 0, 0,
+            hwnd, NULL, 
+            (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), 
+            NULL
+        );
+        SendMessage(hStatic, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
     } else {
-        std::cerr << "Failed to load background image." << std::endl;
+        std::cerr << "Failed to load background image. Ensure 'background.bmp' exists and is valid." << std::endl;
     }
 }
 
@@ -202,8 +211,8 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 
     switch (msg) {
         case WM_CREATE: {
-            // Enable visual styles for a modern UI
-            InitCommonControls();
+            // Enable visual styles for all controls
+            SetWindowTheme(hWnd, L"", L"");
 
             // Create a label for the base URL description
             hDescriptionLabel = CreateWindowW(
@@ -215,6 +224,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
+            SetWindowTheme(hDescriptionLabel, L"", L"");
 
             // Create an edit box for the base URL
             hBaseUrlEdit = CreateWindowW(
@@ -226,6 +236,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
+            SetWindowTheme(hBaseUrlEdit, L"", L"");
 
             // Create a list box for available dates
             hDateList = CreateWindowW(
@@ -237,6 +248,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
+            SetWindowTheme(hDateList, L"", L"");
 
             // Create a button to fetch available dates
             CreateWindowW(
@@ -259,6 +271,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
+            SetWindowTheme(hDownloadButton, L"", L"");
 
             // Create a button to transcribe audio
             hTranscribeButton = CreateWindowW(
@@ -270,6 +283,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
+            SetWindowTheme(hTranscribeButton, L"", L"");
 
             // Create a checkbox for silence trimming
             hTrimSilenceCheckbox = CreateWindowW(
@@ -281,6 +295,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
+            SetWindowTheme(hTrimSilenceCheckbox, L"", L"");
 
             // Create a button to combine files
             hCombineButton = CreateWindowW(
@@ -292,9 +307,10 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
+            SetWindowTheme(hCombineButton, L"", L"");
 
-            // Force use of an older Windows-style theme for this window or controls
-            SetWindowTheme(hWnd, L"", L"");
+            // Load and set the custom background
+            LoadCustomBackground(hWnd);
 
             return 0;
         }
