@@ -11,9 +11,16 @@
 #include <set>
 #include <shlwapi.h> // For PathCombine
 #include <shellapi.h>
+#include <locale>
+#include <codecvt>
+#include <urlmon.h> // For URLDownloadToFile
+#include <uxtheme.h> // For enabling visual styles
+#pragma comment(lib, "urlmon.lib")
 #pragma comment(lib, "Shlwapi.lib")
-
 #pragma comment(lib, "Comctl32.lib")
+#pragma comment(lib, "UxTheme.lib")
+#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' \
+version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #ifndef IDC_PROGRESS
 #define IDC_PROGRESS 1002
@@ -75,16 +82,54 @@ void runTextUI(int argc, wchar_t* argv[]) {
     }
 }
 
-bool CheckAndInstallPythonModules() {
-    // Check if Python is installed
-    if (system("python --version") != 0) {
-        MessageBox(NULL, L"Python is not installed or not added to the system PATH. Please install Python and try again.", L"Error", MB_ICONERROR);
+bool InstallPython() {
+    // URL to the Python installer
+    const wchar_t* pythonInstallerUrl = L"https://www.python.org/ftp/python/3.11.5/python-3.11.5-amd64.exe";
+    const wchar_t* installerPath = L"python-installer.exe";
+
+    // Download the Python installer
+    HRESULT hr = URLDownloadToFile(NULL, pythonInstallerUrl, installerPath, 0, NULL);
+    if (FAILED(hr)) {
+        MessageBox(NULL, L"Failed to download Python installer. Please check your internet connection.", L"Error", MB_ICONERROR);
         return false;
     }
 
-    // Check and install required Python modules
-    std::wstring command = L"python -m pip install --upgrade pip && python -m pip install pydub pocketsphinx openai-whisper ffmpeg-python";
-    int result = system(std::string(command.begin(), command.end()).c_str());
+    // Run the installer silently
+    std::wstring command = L"python-installer.exe /quiet InstallAllUsers=1 PrependPath=1";
+    int result = _wsystem(command.c_str());
+    if (result != 0) {
+        MessageBox(NULL, L"Failed to install Python. Please run the installer manually.", L"Error", MB_ICONERROR);
+        return false;
+    }
+
+    MessageBox(NULL, L"Python has been successfully installed.", L"Success", MB_ICONINFORMATION);
+    return true;
+}
+
+bool CheckAndInstallPythonModules() {
+    // Check if Python is installed
+    if (system("python --version") != 0) {
+        int response = MessageBox(NULL, 
+            L"Python is not installed. The program will attempt to install Python and the required modules in the background. Your user account MUST be an Administrator or have the ability to install programs on this machine. Do you want to proceed? No changes will be made to your device without your permission.", 
+            L"Python Installation Required", 
+            MB_ICONWARNING | MB_YESNO);
+
+        if (response == IDNO) {
+            return false;
+        }
+
+        if (!InstallPython()) {
+            return false;
+        }
+    }
+
+    // Convert the command from std::wstring to std::string
+    std::wstring commandW = L"python -m pip install --upgrade pip && python -m pip install pydub pocketsphinx openai-whisper ffmpeg-python";
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    std::string command = converter.to_bytes(commandW);
+
+    // Execute the command
+    int result = system(command.c_str());
 
     if (result != 0) {
         MessageBox(NULL, L"Failed to install required Python modules. Please check your Python installation and try again.", L"Error", MB_ICONERROR);
@@ -96,6 +141,12 @@ bool CheckAndInstallPythonModules() {
 }
 
 void OnTranscribeButtonClick(const std::wstring& inputFile, bool trimSilence) {
+    // Show disclaimer
+    MessageBox(NULL, 
+        L"The transcription functionality requires Python and specific modules. If Python or the modules are not installed, the program will attempt to install them automatically.", 
+        L"Transcription Disclaimer", 
+        MB_ICONINFORMATION);
+
     // Ensure Python modules are installed
     if (!CheckAndInstallPythonModules()) {
         return;
@@ -147,15 +198,19 @@ void LoadCustomBackground(HWND hwnd) {
 }
 
 LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    static HWND hBaseUrlEdit, hDateList, hDownloadButton, hTranscribeButton, hCombineButton, hTrimSilenceCheckbox;
+    static HWND hBaseUrlEdit, hDescriptionLabel, hDateList, hDownloadButton, hTranscribeButton, hCombineButton, hTrimSilenceCheckbox;
 
     switch (msg) {
         case WM_CREATE: {
-            // Create a label for the base URL
-            CreateWindowW(
-                L"STATIC", L"Base URL:",
+            // Enable visual styles for a modern UI
+            InitCommonControls();
+
+            // Create a label for the base URL description
+            hDescriptionLabel = CreateWindowW(
+                L"STATIC", 
+                L"Enter the numerical feed ID or paste the full URL:",
                 WS_VISIBLE | WS_CHILD,
-                10, 10, 80, 20,
+                10, 10, 380, 20,
                 hWnd, NULL,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
@@ -163,9 +218,10 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 
             // Create an edit box for the base URL
             hBaseUrlEdit = CreateWindowW(
-                L"EDIT", L"https://www.broadcastify.com/archives/feed/",
+                L"EDIT", 
+                L"",
                 WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL,
-                100, 10, 300, 20,
+                10, 40, 380, 20,
                 hWnd, NULL,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
@@ -173,9 +229,10 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 
             // Create a list box for available dates
             hDateList = CreateWindowW(
-                L"LISTBOX", NULL,
+                L"LISTBOX", 
+                NULL,
                 WS_VISIBLE | WS_CHILD | WS_BORDER | LBS_NOTIFY,
-                10, 40, 390, 100,
+                10, 70, 380, 100,
                 hWnd, (HMENU)IDC_PROGRESS,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
@@ -183,9 +240,10 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 
             // Create a button to fetch available dates
             CreateWindowW(
-                L"BUTTON", L"Fetch Dates",
+                L"BUTTON", 
+                L"Fetch Dates",
                 WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-                10, 150, 120, 30,
+                10, 180, 120, 30,
                 hWnd, (HMENU)1,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
@@ -193,9 +251,10 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 
             // Create a button to download selected dates
             hDownloadButton = CreateWindowW(
-                L"BUTTON", L"Download",
+                L"BUTTON", 
+                L"Download",
                 WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-                140, 150, 120, 30,
+                140, 180, 120, 30,
                 hWnd, (HMENU)2,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
@@ -203,9 +262,10 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 
             // Create a button to transcribe audio
             hTranscribeButton = CreateWindowW(
-                L"BUTTON", L"Transcribe",
+                L"BUTTON", 
+                L"Transcribe",
                 WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-                270, 150, 120, 30,
+                270, 180, 120, 30,
                 hWnd, (HMENU)3,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
@@ -213,9 +273,10 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 
             // Create a checkbox for silence trimming
             hTrimSilenceCheckbox = CreateWindowW(
-                L"BUTTON", L"Trim Silence",
+                L"BUTTON", 
+                L"Trim Silence",
                 WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX,
-                10, 190, 120, 20,
+                10, 220, 120, 20,
                 hWnd, (HMENU)4,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
@@ -223,13 +284,17 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 
             // Create a button to combine files
             hCombineButton = CreateWindowW(
-                L"BUTTON", L"Combine Files",
+                L"BUTTON", 
+                L"Combine Files",
                 WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-                140, 190, 120, 30,
+                140, 220, 120, 30,
                 hWnd, (HMENU)5,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
+
+            // Force use of an older Windows-style theme for this window or controls
+            SetWindowTheme(hWnd, L"", L"");
 
             return 0;
         }
@@ -283,8 +348,13 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
     return DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
-#ifdef GRAPHICAL_MODE
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpCmdLine, int nCmdShow) {
+// Enable visual styles for the application
+int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow) {
+    INITCOMMONCONTROLSEX icex;
+    icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
+    icex.dwICC = ICC_WIN95_CLASSES; // Enable common controls
+    InitCommonControlsEx(&icex);
+
     WNDCLASSW wc = {};
     wc.lpfnWndProc = MainWndProc;
     wc.hInstance = hInstance;
@@ -321,42 +391,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpCmdLine, int nCmdShow
 
     return 0;
 }
-#else
-int main(int argc, char* argv[]) {
-    std::cout << "Mp3Combiner is running in console mode!" << std::endl;
-
-    if (argc < 3) {
-        std::cerr << "Usage: Mp3Combiner.exe <broadcastify_feed_url> <output_file> [file1 file2 ...] [--transcribe]\n";
-        return 1;
-    }
-
-    std::string feedUrl = argv[1];
-    std::string outputFile = argv[2];
-    std::vector<std::string> inputFiles;
-    bool transcribe = false;
-
-    for (int i = 3; i < argc; ++i) {
-        if (std::string(argv[i]) == "--transcribe") {
-            transcribe = true;
-        } else {
-            inputFiles.push_back(argv[i]);
-        }
-    }
-
-    // Perform operations
-    // downloadFeedArchives(NULL, NULL, feedUrl); // Uncomment and implement if needed
-    if (!inputFiles.empty()) {
-        // combineFiles(outputFile, inputFiles); // Uncomment and implement if needed
-    }
-    if (transcribe) {
-        std::string wavFile = "transcribed_" + outputFile + ".wav";
-        // runFFmpeg(outputFile, wavFile); // Uncomment and implement if needed
-        // runTranscriber(wavFile);       // Uncomment and implement if needed
-    }
-
-    return 0;
-}
-#endif
 
 void runFFmpeg(const std::wstring& inputFile, const std::wstring& outputFile) {
     std::wstring ffmpegPath = L"bin\\ffmpeg.exe"; // Updated path

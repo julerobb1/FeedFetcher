@@ -115,13 +115,22 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message></Message>
+      <Message>	</Message>
       <Command>setlocal
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/bin/curl.exe Z:/Github/FeedFetcher/bin/ffmpeg.exe Z:/Github/FeedFetcher/bin/ffplay.exe Z:/Github/FeedFetcher/bin/ffprobe.exe Z:/Github/FeedFetcher/bin/libcurl-x64.dll Z:/Github/FeedFetcher/bin/curl-ca-bundle.crt Z:/Github/FeedFetcher/bin/bkg-demo.jpg Z:/Github/FeedFetcher/build/Debug
 if %errorlevel% neq 0 goto :cmEnd
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/python_scripts/transcriber.py Z:/Github/FeedFetcher/build/Debug
 if %errorlevel% neq 0 goto :cmEnd
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/assets/bkg-demo.jpeg Z:/Github/FeedFetcher/build/Debug
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy Z:/Github/FeedFetcher/transcribe.py Z:/Github/FeedFetcher/build/transcribe.py
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -176,13 +185,22 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message></Message>
+      <Message>	</Message>
       <Command>setlocal
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/bin/curl.exe Z:/Github/FeedFetcher/bin/ffmpeg.exe Z:/Github/FeedFetcher/bin/ffplay.exe Z:/Github/FeedFetcher/bin/ffprobe.exe Z:/Github/FeedFetcher/bin/libcurl-x64.dll Z:/Github/FeedFetcher/bin/curl-ca-bundle.crt Z:/Github/FeedFetcher/bin/bkg-demo.jpg Z:/Github/FeedFetcher/build/Release
 if %errorlevel% neq 0 goto :cmEnd
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/python_scripts/transcriber.py Z:/Github/FeedFetcher/build/Release
 if %errorlevel% neq 0 goto :cmEnd
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/assets/bkg-demo.jpeg Z:/Github/FeedFetcher/build/Release
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy Z:/Github/FeedFetcher/transcribe.py Z:/Github/FeedFetcher/build/transcribe.py
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -237,13 +255,22 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message></Message>
+      <Message>	</Message>
       <Command>setlocal
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/bin/curl.exe Z:/Github/FeedFetcher/bin/ffmpeg.exe Z:/Github/FeedFetcher/bin/ffplay.exe Z:/Github/FeedFetcher/bin/ffprobe.exe Z:/Github/FeedFetcher/bin/libcurl-x64.dll Z:/Github/FeedFetcher/bin/curl-ca-bundle.crt Z:/Github/FeedFetcher/bin/bkg-demo.jpg Z:/Github/FeedFetcher/build/MinSizeRel
 if %errorlevel% neq 0 goto :cmEnd
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/python_scripts/transcriber.py Z:/Github/FeedFetcher/build/MinSizeRel
 if %errorlevel% neq 0 goto :cmEnd
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/assets/bkg-demo.jpeg Z:/Github/FeedFetcher/build/MinSizeRel
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy Z:/Github/FeedFetcher/transcribe.py Z:/Github/FeedFetcher/build/transcribe.py
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -297,13 +324,22 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message></Message>
+      <Message>	</Message>
       <Command>setlocal
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/bin/curl.exe Z:/Github/FeedFetcher/bin/ffmpeg.exe Z:/Github/FeedFetcher/bin/ffplay.exe Z:/Github/FeedFetcher/bin/ffprobe.exe Z:/Github/FeedFetcher/bin/libcurl-x64.dll Z:/Github/FeedFetcher/bin/curl-ca-bundle.crt Z:/Github/FeedFetcher/bin/bkg-demo.jpg Z:/Github/FeedFetcher/build/RelWithDebInfo
 if %errorlevel% neq 0 goto :cmEnd
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/python_scripts/transcriber.py Z:/Github/FeedFetcher/build/RelWithDebInfo
 if %errorlevel% neq 0 goto :cmEnd
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/assets/bkg-demo.jpeg Z:/Github/FeedFetcher/build/RelWithDebInfo
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy Z:/Github/FeedFetcher/transcribe.py Z:/Github/FeedFetcher/build/transcribe.py
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
