@@ -26,6 +26,8 @@ version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' la
 #define IDC_PROGRESS 1002
 #endif
 
+#define BASE_URL L"https://archives.broadcastify.com/"
+
 // Forward declarations
 std::vector<std::wstring> crawlArchiveDates(const std::wstring& baseUrl);
 void runFFmpeg(const std::wstring& inputFile, const std::wstring& outputFile);
@@ -214,10 +216,10 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
             // Enable visual styles for all controls
             SetWindowTheme(hWnd, L"", L"");
 
-            // Create a label for the base URL description
+            // Create a label for the feed ID description
             hDescriptionLabel = CreateWindowW(
                 L"STATIC", 
-                L"Enter the numerical feed ID or paste the full URL:",
+                L"Enter the numerical feed ID:",
                 WS_VISIBLE | WS_CHILD,
                 10, 10, 380, 20,
                 hWnd, NULL,
@@ -226,7 +228,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
             );
             SetWindowTheme(hDescriptionLabel, L"", L"");
 
-            // Create an edit box for the base URL
+            // Create an edit box for the feed ID
             hBaseUrlEdit = CreateWindowW(
                 L"EDIT", 
                 L"",
@@ -316,10 +318,14 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
         }
         case WM_COMMAND: {
             if (LOWORD(wParam) == 1) { // Fetch Dates button clicked
-                wchar_t baseUrl[512];
-                GetWindowTextW(hBaseUrlEdit, baseUrl, 512);
+                wchar_t feedId[512];
+                GetWindowTextW(hBaseUrlEdit, feedId, 512);
 
-                std::vector<std::wstring> dates = crawlArchiveDates(baseUrl);
+                // Construct the full URL
+                std::wstring fullUrl = BASE_URL + std::wstring(feedId);
+
+                // Fetch available dates
+                std::vector<std::wstring> dates = crawlArchiveDates(fullUrl);
                 SendMessageW(hDateList, LB_RESETCONTENT, 0, 0); // Clear the list box
 
                 for (const auto& date : dates) {
@@ -331,14 +337,17 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                     std::vector<int> selectedIndices(count);
                     SendMessageW(hDateList, LB_GETSELITEMS, count, (LPARAM)selectedIndices.data());
 
-                    wchar_t baseUrl[512];
-                    GetWindowTextW(hBaseUrlEdit, baseUrl, 512);
+                    wchar_t feedId[512];
+                    GetWindowTextW(hBaseUrlEdit, feedId, 512);
+
+                    // Construct the full URL
+                    std::wstring fullUrl = BASE_URL + std::wstring(feedId);
 
                     for (int index : selectedIndices) {
                         wchar_t date[16];
                         SendMessageW(hDateList, LB_GETTEXT, index, (LPARAM)date);
 
-                        std::wstring archiveUrl = std::wstring(baseUrl) + L"/" + date + L"/";
+                        std::wstring archiveUrl = fullUrl + L"/" + date + L"/";
                         downloadFeedArchives(hWnd, hProgressBar, archiveUrl);
                     }
                 }

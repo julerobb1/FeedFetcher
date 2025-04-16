@@ -70,12 +70,26 @@ else()
     set_target_properties(${EXECUTABLE_NAME} PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
 endif()
 
-# Add custom commands to copy runtime dependencies after FeedFetcher is built
-add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${BIN_FILES} $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PYTHON_SCRIPTS} $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${JPEG_FILES} $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
+# Define the files to copy
+set(FILES_TO_COPY
+    ${CMAKE_SOURCE_DIR}/bin/curl.exe
+    ${CMAKE_SOURCE_DIR}/bin/ffmpeg.exe
+    ${CMAKE_SOURCE_DIR}/bin/ffplay.exe
+    ${CMAKE_SOURCE_DIR}/bin/ffprobe.exe
+    ${CMAKE_SOURCE_DIR}/bin/libcurl-x64.dll
+    ${CMAKE_SOURCE_DIR}/bin/curl-ca-bundle.crt
+    ${CMAKE_SOURCE_DIR}/bin/background.bmp
+    ${CMAKE_SOURCE_DIR}/assets/bkg-demo.jpg
+    ${CMAKE_SOURCE_DIR}/python_scripts/transcriber.py
 )
+
+# Copy files to the output directory
+foreach(FILE ${FILES_TO_COPY})
+    add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FILE} $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    )
+endforeach()
 
 # Link required libraries
 target_link_libraries(${EXECUTABLE_NAME} Comctl32)
