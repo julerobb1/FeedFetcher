@@ -33,15 +33,19 @@ set(ROOT_HEADERS
     resource.h
 )
 
+# Define source and destination directories with trailing slashes
+set(BIN_DIR ${CMAKE_SOURCE_DIR}/bin/)
+set(RELEASE_DIR ${CMAKE_BINARY_DIR}/Release/)
+
 # Include files from the bin directory
 set(BIN_FILES
-    ${CMAKE_SOURCE_DIR}/bin/curl.exe
-    ${CMAKE_SOURCE_DIR}/bin/ffmpeg.exe
-    ${CMAKE_SOURCE_DIR}/bin/ffplay.exe
-    ${CMAKE_SOURCE_DIR}/bin/ffprobe.exe
-    ${CMAKE_SOURCE_DIR}/bin/libcurl-x64.dll
-    ${CMAKE_SOURCE_DIR}/bin/curl-ca-bundle.crt
-    ${CMAKE_SOURCE_DIR}/bin/bkg-demo.jpg
+    ${BIN_DIR}curl.exe
+    ${BIN_DIR}ffmpeg.exe
+    ${BIN_DIR}ffplay.exe
+    ${BIN_DIR}ffprobe.exe
+    ${BIN_DIR}libcurl-x64.dll
+    ${BIN_DIR}curl-ca-bundle.crt
+    ${BIN_DIR}bkg-demo.jpeg
 )
 
 # Include Python scripts
@@ -49,16 +53,14 @@ set(PYTHON_SCRIPTS
     ${CMAKE_SOURCE_DIR}/python_scripts/transcriber.py
 )
 
-# Include JPEG files
-set(JPEG_FILES
-    ${CMAKE_SOURCE_DIR}/assets/bkg-demo.jpeg
-)
-
 # Set executable name with build number
 set(EXECUTABLE_NAME "FeedFetcher_${BUILD_NUMBER}")
 
+# Ensure the output directory is set correctly
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
 # Add executable for the project
-add_executable(${EXECUTABLE_NAME} ${ROOT_SOURCES} ${ROOT_HEADERS})
+add_executable(${EXECUTABLE_NAME} ${ROOT_SOURCES})
 
 # Pass GRAPHICAL_MODE definition to the compiler if enabled
 if(GRAPHICAL_MODE)
@@ -70,36 +72,18 @@ else()
     set_target_properties(${EXECUTABLE_NAME} PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
 endif()
 
-# Define the files to copy
-set(FILES_TO_COPY
-    ${CMAKE_SOURCE_DIR}/bin/curl.exe
-    ${CMAKE_SOURCE_DIR}/bin/ffmpeg.exe
-    ${CMAKE_SOURCE_DIR}/bin/ffplay.exe
-    ${CMAKE_SOURCE_DIR}/bin/ffprobe.exe
-    ${CMAKE_SOURCE_DIR}/bin/libcurl-x64.dll
-    ${CMAKE_SOURCE_DIR}/bin/curl-ca-bundle.crt
-    ${CMAKE_SOURCE_DIR}/bin/background.bmp
-    ${CMAKE_SOURCE_DIR}/assets/bkg-demo.jpg
-    ${CMAKE_SOURCE_DIR}/python_scripts/transcriber.py
+# Add custom commands to copy runtime dependencies after FeedFetcher is built
+add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${BIN_FILES} $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PYTHON_SCRIPTS} $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
 )
-
-# Copy files to the output directory
-foreach(FILE ${FILES_TO_COPY})
-    add_custom_command(
-        TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FILE} $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    )
-endforeach()
 
 # Link required libraries
 target_link_libraries(${EXECUTABLE_NAME} Comctl32)
 
-# Include Python script as a resource
-add_custom_command(
-    TARGET ${EXECUTABLE_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/transcribe.py ${CMAKE_BINARY_DIR}/transcribe.py
-)
+# Ensure required files are copied to the Release directory
+file(COPY ${BIN_FILES} DESTINATION ${RELEASE_DIR})
+file(COPY ${PYTHON_SCRIPTS} DESTINATION ${RELEASE_DIR})
 
-# Add custom background as a resource
-set(RESOURCE_FILES ${CMAKE_SOURCE_DIR}/background.bmp)
-source_group("Resources" FILES ${RESOURCE_FILES})
+# Ensure the transcribe.py script is copied
+file(COPY ${CMAKE_SOURCE_DIR}/transcribe.py DESTINATION ${RELEASE_DIR})
