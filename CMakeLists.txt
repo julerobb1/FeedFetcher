@@ -35,22 +35,17 @@ set(ROOT_HEADERS
 
 # Define source and destination directories with trailing slashes
 set(BIN_DIR ${CMAKE_SOURCE_DIR}/bin/)
+set(PYTHON_SCRIPTS_DIR ${CMAKE_SOURCE_DIR}/python_scripts/)
 set(RELEASE_DIR ${CMAKE_BINARY_DIR}/Release/)
 
 # Include files from the bin directory
-set(BIN_FILES
-    ${BIN_DIR}curl.exe
-    ${BIN_DIR}ffmpeg.exe
-    ${BIN_DIR}ffplay.exe
-    ${BIN_DIR}ffprobe.exe
-    ${BIN_DIR}libcurl-x64.dll
-    ${BIN_DIR}curl-ca-bundle.crt
-    ${BIN_DIR}bkg-demo.jpeg
+file(GLOB BIN_FILES
+    ${BIN_DIR}*
 )
 
 # Include Python scripts
-set(PYTHON_SCRIPTS
-    ${CMAKE_SOURCE_DIR}/python_scripts/transcriber.py
+file(GLOB PYTHON_SCRIPTS
+    ${PYTHON_SCRIPTS_DIR}*.py
 )
 
 # Set executable name with build number
@@ -60,7 +55,7 @@ set(EXECUTABLE_NAME "FeedFetcher_${BUILD_NUMBER}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # Add executable for the project
-add_executable(${EXECUTABLE_NAME} ${ROOT_SOURCES})
+add_executable(${EXECUTABLE_NAME} ${ROOT_SOURCES} ${ROOT_HEADERS})
 
 # Pass GRAPHICAL_MODE definition to the compiler if enabled
 if(GRAPHICAL_MODE)
@@ -81,9 +76,11 @@ add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
 # Link required libraries
 target_link_libraries(${EXECUTABLE_NAME} Comctl32)
 
+# Remove explicit copying to the Release directory
 # Ensure required files are copied to the Release directory
-file(COPY ${BIN_FILES} DESTINATION ${RELEASE_DIR})
-file(COPY ${PYTHON_SCRIPTS} DESTINATION ${RELEASE_DIR})
+# file(COPY ${BIN_FILES} DESTINATION ${RELEASE_DIR})
+# file(COPY ${PYTHON_SCRIPTS} DESTINATION ${RELEASE_DIR})
 
-# Ensure the transcribe.py script is copied
-file(COPY ${CMAKE_SOURCE_DIR}/transcribe.py DESTINATION ${RELEASE_DIR})
+# Ensure the setup.py and transcribe.py scripts are copied
+# file(COPY ${PYTHON_SCRIPTS_DIR}/setup.py DESTINATION ${RELEASE_DIR})
+# file(COPY ${PYTHON_SCRIPTS_DIR}/transcribe.py DESTINATION ${RELEASE_DIR})
