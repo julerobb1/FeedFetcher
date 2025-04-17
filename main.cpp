@@ -15,6 +15,8 @@
 #include <codecvt>
 #include <urlmon.h> // For URLDownloadToFile
 #include <uxtheme.h> // For enabling visual styles
+#include <dwmapi.h>  // For DwmExtendFrameIntoClientArea
+#pragma comment(lib, "Dwmapi.lib") // Link with Dwmapi.lib
 #pragma comment(lib, "urlmon.lib")
 #pragma comment(lib, "Shlwapi.lib")
 #pragma comment(lib, "Comctl32.lib")
@@ -24,9 +26,8 @@ version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' la
 
 #ifndef IDC_PROGRESS
 #define IDC_PROGRESS 1002
-#endif
-
 #define BASE_URL L"https://archives.broadcastify.com/"
+#endif
 
 // Forward declarations
 std::vector<std::wstring> crawlArchiveDates(const std::wstring& baseUrl);
@@ -213,106 +214,99 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 
     switch (msg) {
         case WM_CREATE: {
+            // Temporarily disable Aero Glass effect
+            // MARGINS margins = { -1 };
+            // HRESULT hr = DwmExtendFrameIntoClientArea(hWnd, &margins);
+            // if (FAILED(hr)) {
+            //     std::wcerr << L"Failed to enable Aero Glass effect. Error code: " << hr << std::endl;
+            // }
+
             // Enable visual styles for all controls
-            SetWindowTheme(hWnd, L"", L"");
+            SetWindowTheme(hWnd, L"Explorer", NULL);
+
+            // Adjust window size to fit all controls
+            SetWindowPos(hWnd, NULL, 0, 0, 500, 400, SWP_NOMOVE | SWP_NOZORDER);
 
             // Create a label for the feed ID description
             hDescriptionLabel = CreateWindowW(
                 L"STATIC", 
                 L"Enter the numerical feed ID:",
                 WS_VISIBLE | WS_CHILD,
-                10, 10, 380, 20,
+                10, 10, 480, 20,
                 hWnd, NULL,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
-            SetWindowTheme(hDescriptionLabel, L"", L"");
+            SetWindowTheme(hDescriptionLabel, L"Explorer", NULL);
 
             // Create an edit box for the feed ID
             hBaseUrlEdit = CreateWindowW(
                 L"EDIT", 
                 L"",
                 WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL,
-                10, 40, 380, 20,
+                10, 40, 480, 20,
                 hWnd, NULL,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
-            SetWindowTheme(hBaseUrlEdit, L"", L"");
+            SetWindowTheme(hBaseUrlEdit, L"Explorer", NULL);
 
             // Create a list box for available dates
             hDateList = CreateWindowW(
                 L"LISTBOX", 
                 NULL,
                 WS_VISIBLE | WS_CHILD | WS_BORDER | LBS_NOTIFY,
-                10, 70, 380, 100,
+                10, 70, 480, 150,
                 hWnd, (HMENU)IDC_PROGRESS,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
-            SetWindowTheme(hDateList, L"", L"");
+            SetWindowTheme(hDateList, L"Explorer", NULL);
 
-            // Create a button to fetch available dates
-            CreateWindowW(
-                L"BUTTON", 
-                L"Fetch Dates",
-                WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-                10, 180, 120, 30,
-                hWnd, (HMENU)1,
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL
-            );
-
-            // Create a button to download selected dates
+            // Create buttons with proper alignment
             hDownloadButton = CreateWindowW(
                 L"BUTTON", 
                 L"Download",
                 WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-                140, 180, 120, 30,
+                10, 230, 100, 30,
                 hWnd, (HMENU)2,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
-            SetWindowTheme(hDownloadButton, L"", L"");
+            SetWindowTheme(hDownloadButton, L"Explorer", NULL);
 
-            // Create a button to transcribe audio
             hTranscribeButton = CreateWindowW(
                 L"BUTTON", 
                 L"Transcribe",
                 WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-                270, 180, 120, 30,
+                120, 230, 100, 30,
                 hWnd, (HMENU)3,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
-            SetWindowTheme(hTranscribeButton, L"", L"");
+            SetWindowTheme(hTranscribeButton, L"Explorer", NULL);
 
-            // Create a checkbox for silence trimming
-            hTrimSilenceCheckbox = CreateWindowW(
-                L"BUTTON", 
-                L"Trim Silence",
-                WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX,
-                10, 220, 120, 20,
-                hWnd, (HMENU)4,
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL
-            );
-            SetWindowTheme(hTrimSilenceCheckbox, L"", L"");
-
-            // Create a button to combine files
             hCombineButton = CreateWindowW(
                 L"BUTTON", 
                 L"Combine Files",
                 WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-                140, 220, 120, 30,
+                230, 230, 100, 30,
                 hWnd, (HMENU)5,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
-            SetWindowTheme(hCombineButton, L"", L"");
+            SetWindowTheme(hCombineButton, L"Explorer", NULL);
 
-            // Load and set the custom background
-            LoadCustomBackground(hWnd);
+            hTrimSilenceCheckbox = CreateWindowW(
+                L"BUTTON", 
+                L"Trim Silence",
+                WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX,
+                340, 230, 100, 30,
+                hWnd, (HMENU)4,
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                NULL
+            );
+            SetWindowTheme(hTrimSilenceCheckbox, L"Explorer", NULL);
 
             return 0;
         }
