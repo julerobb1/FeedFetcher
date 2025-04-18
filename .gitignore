@@ -226,3 +226,9 @@ build/Mp3Combiner.dir/Release/Mp3Combiner.tlog/CL.read.1.tlog
 *.tlog
 *.ilk
 *.db
+*.filters
+/FeedFetcher/build/CMakeFiles
+*.depend
+*.vcxproj
+*.recipe
+*.cmake
