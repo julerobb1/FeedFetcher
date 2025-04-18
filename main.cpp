@@ -281,20 +281,34 @@ void SetSubtleRoundedCorners(HWND hWnd) {
 }
 
 LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    static HWND hBaseUrlEdit, hDescriptionLabel, hDateList, hDownloadButton, hTranscribeButton, hCombineButton, hTrimSilenceCheckbox, hProgressBar;
+    static HWND hBaseUrlEdit, hDescriptionLabel, hDateList, hDownloadButton, hTranscribeButton, hCombineButton, hTrimSilenceCheckbox, hProgressBar, hBackground;
 
     switch (msg) {
         case WM_CREATE: {
+            // Load the custom background image
+            HBITMAP hBitmap = (HBITMAP)LoadImage(NULL, L"background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+            if (hBitmap) {
+                hBackground = CreateWindowW(
+                    L"STATIC",
+                    NULL,
+                    WS_VISIBLE | WS_CHILD | SS_BITMAP,
+                    0, 0, 0, 0,
+                    hWnd, NULL,
+                    (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                    NULL
+                );
+                SendMessage(hBackground, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
+            } else {
+                std::cerr << "Failed to load background image. Ensure 'background.bmp' exists and is valid." << std::endl;
+            }
+
             // Apply subtle rounded corners
             SetSubtleRoundedCorners(hWnd);
 
             // Enable visual styles for all controls
             SetWindowTheme(hWnd, L"Explorer", NULL);
 
-            // Adjust window size to fit all controls
-            SetWindowPos(hWnd, NULL, 0, 0, 600, 400, SWP_NOMOVE | SWP_NOZORDER);
-
-            // Create a label for the feed ID description
+            // Create all controls (these will appear in front of the background)
             hDescriptionLabel = CreateWindowW(
                 L"STATIC", 
                 L"Enter the numerical feed ID:",
@@ -305,7 +319,6 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 NULL
             );
 
-            // Create an edit box for the feed ID with prefilled URL
             hBaseUrlEdit = CreateWindowW(
                 L"EDIT", 
                 L"https://www.broadcastify.com/archives/feed/",
@@ -316,7 +329,6 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 NULL
             );
 
-            // Create a list box for available dates
             hDateList = CreateWindowW(
                 L"LISTBOX", 
                 NULL,
@@ -327,7 +339,6 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 NULL
             );
 
-            // Create buttons
             hDownloadButton = CreateWindowW(
                 L"BUTTON", 
                 L"Download",
@@ -368,7 +379,6 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 NULL
             );
 
-            // Create a progress bar
             hProgressBar = CreateWindowW(
                 PROGRESS_CLASS, 
                 NULL,
@@ -381,16 +391,36 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 
             return 0;
         }
+        case WM_SIZE: {
+            // Get the new dimensions of the window
+            int width = LOWORD(lParam);
+            int height = HIWORD(lParam);
+
+            // Resize the background image to fill the window
+            MoveWindow(hBackground, 0, 0, width, height, TRUE);
+
+            // Reposition and resize controls dynamically
+            MoveWindow(hDescriptionLabel, 10, 10, width - 20, 20, TRUE);
+            MoveWindow(hBaseUrlEdit, 10, 40, width - 20, 20, TRUE);
+            MoveWindow(hDateList, 10, 70, width - 20, height - 180, TRUE);
+            MoveWindow(hDownloadButton, 10, height - 100, 100, 30, TRUE);
+            MoveWindow(hTranscribeButton, 120, height - 100, 100, 30, TRUE);
+            MoveWindow(hCombineButton, 230, height - 100, 100, 30, TRUE);
+            MoveWindow(hTrimSilenceCheckbox, 340, height - 100, 100, 30, TRUE);
+            MoveWindow(hProgressBar, 10, height - 60, width - 20, 20, TRUE);
+
+            // Reapply subtle rounded corners
+            SetSubtleRoundedCorners(hWnd);
+
+            // Force redraw to prevent black bars
+            InvalidateRect(hWnd, NULL, TRUE);
+            return 0;
+        }
         case WM_PAINT: {
             // Force redraw to prevent black boxes
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
             EndPaint(hWnd, &ps);
-            return 0;
-        }
-        case WM_SIZE: {
-            // Reapply subtle rounded corners on resize
-            SetSubtleRoundedCorners(hWnd);
             return 0;
         }
         case WM_COMMAND: {
