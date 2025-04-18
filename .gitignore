@@ -232,3 +232,4 @@ build/Mp3Combiner.dir/Release/Mp3Combiner.tlog/CL.read.1.tlog
 *.vcxproj
 *.recipe
 *.cmake
+*.vcxproj
