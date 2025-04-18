@@ -225,3 +225,4 @@ build/Mp3Combiner.dir/Release/Mp3Combiner.tlog/CL.write.1.tlog
 build/Mp3Combiner.dir/Release/Mp3Combiner.tlog/CL.read.1.tlog
 *.tlog
 *.ilk
+*.db
