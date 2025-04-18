@@ -209,61 +209,125 @@ void LoadCustomBackground(HWND hwnd) {
     }
 }
 
+// Forward declaration for the Combine Files window
+void ShowCombineFilesWindow(HWND parent);
+
+// Function to update the progress bar
+void UpdateProgressBar(HWND hProgressBar, int progress) {
+    SendMessage(hProgressBar, PBM_SETPOS, progress, 0);
+}
+
+// Function to handle the Combine Files process
+void HandleCombineFiles(HWND hWnd, const std::vector<std::wstring>& inputFiles, const std::wstring& outputFile, bool trimSilence) {
+    // Show progress bar
+    UpdateProgressBar(hProgressBar, 0);
+
+    // Combine files using FFmpeg
+    std::wstringstream command;
+    command << L"ffmpeg -y -i \"concat:";
+    for (size_t i = 0; i < inputFiles.size(); ++i) {
+        command << inputFiles[i];
+        if (i < inputFiles.size() - 1) {
+            command << L"|";
+        }
+    }
+    command << L"\" -c copy " << outputFile;
+
+    // Execute FFmpeg command
+    int result = _wsystem(command.str().c_str());
+    if (result != 0) {
+        MessageBox(hWnd, L"Failed to combine files using FFmpeg.", L"Error", MB_ICONERROR);
+        return;
+    }
+
+    // If Trim Silence is enabled, process the output file with pydub
+    if (trimSilence) {
+        std::wstring pythonCommand = L"python python_scripts/transcribe.py --trim-silence \"" + outputFile + L"\"";
+        result = _wsystem(pythonCommand.c_str());
+        if (result != 0) {
+            MessageBox(hWnd, L"Failed to trim silence using pydub.", L"Error", MB_ICONERROR);
+            return;
+        }
+    }
+
+    // Update progress bar to 100%
+    UpdateProgressBar(hProgressBar, 100);
+    MessageBox(hWnd, L"Combine Files process completed successfully.", L"Success", MB_ICONINFORMATION);
+}
+
+// Function to reduce rounded edges on Windows 11
+// void ReduceRoundedEdges(HWND hWnd) {
+//     const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
+//     const int DWM_WINDOW_CORNER_PREFERENCE_NONE = 1; // No rounded corners
+//     DwmSetWindowAttribute(hWnd, DWMWA_WINDOW_CORNER_PREFERENCE, &DWM_WINDOW_CORNER_PREFERENCE_NONE, sizeof(DWM_WINDOW_CORNER_PREFERENCE_NONE));
+// }
+
+// Function to create subtle rounded corners
+void SetSubtleRoundedCorners(HWND hWnd) {
+    // Define the corner radius (smaller for subtle rounding)
+    const int cornerRadius = 5; // Adjust this value for more or less rounding
+
+    // Get the window dimensions
+    RECT rect;
+    GetWindowRect(hWnd, &rect);
+    int width = rect.right - rect.left;
+    int height = rect.bottom - rect.top;
+
+    // Create a rounded region
+    HRGN hRgn = CreateRoundRectRgn(0, 0, width, height, cornerRadius, cornerRadius);
+
+    // Apply the region to the window
+    SetWindowRgn(hWnd, hRgn, TRUE);
+}
+
 LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    static HWND hBaseUrlEdit, hDescriptionLabel, hDateList, hDownloadButton, hTranscribeButton, hCombineButton, hTrimSilenceCheckbox;
+    static HWND hBaseUrlEdit, hDescriptionLabel, hDateList, hDownloadButton, hTranscribeButton, hCombineButton, hTrimSilenceCheckbox, hProgressBar;
 
     switch (msg) {
         case WM_CREATE: {
-            // Temporarily disable Aero Glass effect
-            // MARGINS margins = { -1 };
-            // HRESULT hr = DwmExtendFrameIntoClientArea(hWnd, &margins);
-            // if (FAILED(hr)) {
-            //     std::wcerr << L"Failed to enable Aero Glass effect. Error code: " << hr << std::endl;
-            // }
+            // Apply subtle rounded corners
+            SetSubtleRoundedCorners(hWnd);
 
             // Enable visual styles for all controls
             SetWindowTheme(hWnd, L"Explorer", NULL);
 
             // Adjust window size to fit all controls
-            SetWindowPos(hWnd, NULL, 0, 0, 500, 400, SWP_NOMOVE | SWP_NOZORDER);
+            SetWindowPos(hWnd, NULL, 0, 0, 600, 400, SWP_NOMOVE | SWP_NOZORDER);
 
             // Create a label for the feed ID description
             hDescriptionLabel = CreateWindowW(
                 L"STATIC", 
                 L"Enter the numerical feed ID:",
                 WS_VISIBLE | WS_CHILD,
-                10, 10, 480, 20,
+                10, 10, 580, 20,
                 hWnd, NULL,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
-            SetWindowTheme(hDescriptionLabel, L"Explorer", NULL);
 
-            // Create an edit box for the feed ID
+            // Create an edit box for the feed ID with prefilled URL
             hBaseUrlEdit = CreateWindowW(
                 L"EDIT", 
-                L"",
+                L"https://www.broadcastify.com/archives/feed/",
                 WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL,
-                10, 40, 480, 20,
+                10, 40, 580, 20,
                 hWnd, NULL,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
-            SetWindowTheme(hBaseUrlEdit, L"Explorer", NULL);
 
             // Create a list box for available dates
             hDateList = CreateWindowW(
                 L"LISTBOX", 
                 NULL,
                 WS_VISIBLE | WS_CHILD | WS_BORDER | LBS_NOTIFY,
-                10, 70, 480, 150,
+                10, 70, 580, 150,
                 hWnd, (HMENU)IDC_PROGRESS,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
-            SetWindowTheme(hDateList, L"Explorer", NULL);
 
-            // Create buttons with proper alignment
+            // Create buttons
             hDownloadButton = CreateWindowW(
                 L"BUTTON", 
                 L"Download",
@@ -273,7 +337,6 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
-            SetWindowTheme(hDownloadButton, L"Explorer", NULL);
 
             hTranscribeButton = CreateWindowW(
                 L"BUTTON", 
@@ -284,7 +347,6 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
-            SetWindowTheme(hTranscribeButton, L"Explorer", NULL);
 
             hCombineButton = CreateWindowW(
                 L"BUTTON", 
@@ -295,7 +357,6 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
-            SetWindowTheme(hCombineButton, L"Explorer", NULL);
 
             hTrimSilenceCheckbox = CreateWindowW(
                 L"BUTTON", 
@@ -306,8 +367,30 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL
             );
-            SetWindowTheme(hTrimSilenceCheckbox, L"Explorer", NULL);
 
+            // Create a progress bar
+            hProgressBar = CreateWindowW(
+                PROGRESS_CLASS, 
+                NULL,
+                WS_VISIBLE | WS_CHILD,
+                10, 270, 580, 20,
+                hWnd, NULL,
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                NULL
+            );
+
+            return 0;
+        }
+        case WM_PAINT: {
+            // Force redraw to prevent black boxes
+            PAINTSTRUCT ps;
+            HDC hdc = BeginPaint(hWnd, &ps);
+            EndPaint(hWnd, &ps);
+            return 0;
+        }
+        case WM_SIZE: {
+            // Reapply subtle rounded corners on resize
+            SetSubtleRoundedCorners(hWnd);
             return 0;
         }
         case WM_COMMAND: {
@@ -354,9 +437,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 
                 OnTranscribeButtonClick(inputFile, trimSilence);
             } else if (LOWORD(wParam) == 5) { // Combine button clicked
-                std::vector<std::wstring> inputFiles = {L"file1.mp3", L"file2.mp3"}; // Example files
-                std::wstring outputFile = L"combined.mp3";
-                OnCombineButtonClick(inputFiles, outputFile);
+                ShowCombineFilesWindow(hWnd);
             }
             return 0;
         }
@@ -365,6 +446,31 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
             return 0;
     }
     return DefWindowProcW(hWnd, msg, wParam, lParam);
+}
+
+// Function to show the Combine Files window
+void ShowCombineFilesWindow(HWND parent) {
+    HWND hCombineWnd = CreateWindowW(
+        L"STATIC",
+        L"Combine Files",
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT,
+        400, 300,
+        parent, NULL,
+        (HINSTANCE)GetWindowLongPtr(parent, GWLP_HINSTANCE),
+        NULL
+    );
+
+    if (!hCombineWnd) {
+        MessageBoxW(NULL, L"Failed to create Combine Files window.", L"Error", MB_ICONERROR);
+        return;
+    }
+
+    ShowWindow(hCombineWnd, SW_SHOW);
+    UpdateWindow(hCombineWnd);
+
+    // Add controls for file selection, progress bar, and combine action
+    // ... Add controls and logic here ...
 }
 
 // Enable visual styles for the application
