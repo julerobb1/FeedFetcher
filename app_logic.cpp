@@ -40,7 +40,7 @@ void downloadFeedArchives(HWND hWnd, HWND hProgressBar, const std::wstring& feed
     } else {
         MessageBoxW(hWnd, L"Failed to download feed archives.", L"Error", MB_ICONERROR);
     }
-}
+} 
 
 void runTranscriber(const std::wstring& audioFilePath) {
     std::wstring command = L"transcriber_tool.exe " + audioFilePath + L" > transcription.txt";
