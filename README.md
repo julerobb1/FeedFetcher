@@ -64,7 +64,7 @@ python transcribe.py <engine> <input_file> [--trim-silence]
 - `--trim-silence`: Optional flag to remove silence before transcription.
 
 ---
-
+   
 ## Notes
 - Whisper requires a GPU for optimal performance. If no GPU is detected, PocketSphinx will be used by default.
 - Please ensure FFmpeg is installed and added to your system PATH for audio processing. - In some cases this step has been required, other times its not typically needed. But in general, make sure FFmpeg is installed. 
