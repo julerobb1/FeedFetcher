@@ -15,6 +15,8 @@
 #include <codecvt>
 #include <urlmon.h> // For URLDownloadToFile
 #include <uxtheme.h> // For enabling visual styles
+#include "bin/json.hpp" // Corrected include path for nlohmann/json
+using json = nlohmann::json; // Alias for JSON library
 #pragma comment(lib, "Dwmapi.lib")
 #pragma comment(lib, "urlmon.lib")
 #pragma comment(lib, "Shlwapi.lib")
@@ -29,7 +31,7 @@ version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' la
 #endif
 
 // Forward declarations
-std::vector<std::wstring> crawlArchiveDates(const std::wstring& baseUrl);
+std::vector<std::wstring> crawlArchiveDates(const std::wstring& baseUrl, const std::wstring& date);
 void runFFmpeg(const std::wstring& inputFile, const std::wstring& outputFile);
 bool CheckAndInstallPythonModules();
 void OnTranscribeButtonClick(const std::wstring& inputFile, bool trimSilence);
@@ -44,19 +46,81 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 
     switch (msg) {
         case WM_CREATE: {
-            // Enable visual styles for all controls
-            SetWindowTheme(hWnd, L"Explorer", NULL);
+            // Disable modern visual styles for the window
+            SetWindowTheme(hWnd, L"", L"");
 
-            // Create UI elements
-            hDescriptionLabel = CreateWindowW(L"STATIC", L"Enter the numerical feed ID:", WS_VISIBLE | WS_CHILD, 10, 10, 580, 20, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-            hBaseUrlEdit = CreateWindowW(L"EDIT", L"https://www.broadcastify.com/archives/feed/", WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 10, 40, 580, 20, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-            hDateList = CreateWindowW(L"LISTBOX", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | LBS_NOTIFY, 10, 70, 580, 150, hWnd, (HMENU)IDC_PROGRESS, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-            hDownloadButton = CreateWindowW(L"BUTTON", L"Download", WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 230, 100, 30, hWnd, (HMENU)2, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-            hTranscribeButton = CreateWindowW(L"BUTTON", L"Transcribe", WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 120, 230, 100, 30, hWnd, (HMENU)3, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-            hCombineButton = CreateWindowW(L"BUTTON", L"Combine Files", WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 230, 230, 100, 30, hWnd, (HMENU)5, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-            hTrimSilenceCheckbox = CreateWindowW(L"BUTTON", L"Trim Silence", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 340, 230, 100, 30, hWnd, (HMENU)4, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-            hProgressBar = CreateWindowW(PROGRESS_CLASS, NULL, WS_VISIBLE | WS_CHILD, 10, 270, 580, 20, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+            // Create UI elements with corrected positions and sizes
+            hDescriptionLabel = CreateWindowW(L"STATIC", L"Enter the numerical feed ID:", 
+                WS_VISIBLE | WS_CHILD, 10, 10, 580, 20, hWnd, NULL, 
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
 
+            hBaseUrlEdit = CreateWindowW(L"EDIT", L"https://www.broadcastify.com/archives/feed/", 
+                WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 
+                10, 40, 580, 20, hWnd, NULL, 
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+
+            hDateList = CreateWindowW(L"LISTBOX", NULL, 
+                WS_VISIBLE | WS_CHILD | WS_BORDER | LBS_NOTIFY, 
+                10, 70, 580, 120, hWnd, (HMENU)IDC_PROGRESS, 
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+
+            hDownloadButton = CreateWindowW(L"BUTTON", L"Download", 
+                WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 
+                10, 200, 100, 30, hWnd, (HMENU)2, 
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+
+            hTranscribeButton = CreateWindowW(L"BUTTON", L"Transcribe", 
+                WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 
+                120, 200, 100, 30, hWnd, (HMENU)3, 
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+
+            hCombineButton = CreateWindowW(L"BUTTON", L"Combine Files", 
+                WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 
+                230, 200, 100, 30, hWnd, (HMENU)5, 
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+
+            hTrimSilenceCheckbox = CreateWindowW(L"BUTTON", L"Trim Silence", 
+                WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 
+                340, 200, 100, 30, hWnd, (HMENU)4, 
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+
+            hProgressBar = CreateWindowW(PROGRESS_CLASS, NULL, 
+                WS_VISIBLE | WS_CHILD, 
+                10, 240, 580, 20, hWnd, NULL, 
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+
+            return 0;
+        }
+        case WM_NCPAINT: {
+            // Custom draw the title bar for a classic look
+            HDC hdc = GetWindowDC(hWnd);
+            RECT rect;
+            GetWindowRect(hWnd, &rect);
+            OffsetRect(&rect, -rect.left, -rect.top);
+
+            // Draw the title bar background
+            HBRUSH hBrush = CreateSolidBrush(RGB(192, 192, 192)); // Classic gray color
+            FillRect(hdc, &rect, hBrush);
+            DeleteObject(hBrush);
+
+            // Draw the title text
+            SetBkMode(hdc, TRANSPARENT);
+            SetTextColor(hdc, RGB(0, 0, 0)); // Black text
+            HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+            SelectObject(hdc, hFont);
+            DrawText(hdc, L"Feed Downloader", -1, &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
+            // Draw the minimize, maximize, and close buttons
+            RECT btnRect = { rect.right - 120, rect.top, rect.right, rect.top + 30 };
+            DrawFrameControl(hdc, &btnRect, DFC_CAPTION, DFCS_CAPTIONCLOSE);
+            btnRect.left -= 40;
+            btnRect.right -= 40;
+            DrawFrameControl(hdc, &btnRect, DFC_CAPTION, DFCS_CAPTIONMAX);
+            btnRect.left -= 40;
+            btnRect.right -= 40;
+            DrawFrameControl(hdc, &btnRect, DFC_CAPTION, DFCS_CAPTIONMIN);
+
+            ReleaseDC(hWnd, hdc);
             return 0;
         }
         case WM_COMMAND: {
@@ -64,9 +128,9 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
                 wchar_t feedId[512];
                 GetWindowTextW(hBaseUrlEdit, feedId, 512);
                 std::wstring fullUrl = BASE_URL + std::wstring(feedId);
-                std::vector<std::wstring> dates = crawlArchiveDates(fullUrl);
+                std::vector<std::wstring> dates = crawlArchiveDates(fullUrl, L"04/18/2025"); // Example date
                 SendMessageW(hDateList, LB_RESETCONTENT, 0, 0);
-                for (const auto& date : dates) {
+                for (const auto& date : dates) {con
                     SendMessageW(hDateList, LB_ADDSTRING, 0, (LPARAM)date.c_str());
                 }
             } else if (LOWORD(wParam) == 3) { // Transcribe button clicked
@@ -98,9 +162,12 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
     wc.lpfnWndProc = MainWndProc;
     wc.hInstance = hInstance;
     wc.lpszClassName = L"FeedDownloaderClass";
+    // wc.hIcon = LoadIcon(NULL, IDI_APPLICATION); // Use default icon or replace with custom icon
     RegisterClassW(&wc);
 
-    HWND hWnd = CreateWindowW(wc.lpszClassName, L"Feed Downloader", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 600, 400, NULL, NULL, hInstance, NULL);
+    HWND hWnd = CreateWindowW(wc.lpszClassName, L"Feed Downloader", 
+        WS_OVERLAPPEDWINDOW & ~WS_THICKFRAME & ~WS_MAXIMIZEBOX, // Disable resizing and maximize button
+        CW_USEDEFAULT, CW_USEDEFAULT, 600, 400, NULL, NULL, hInstance, NULL);
     if (!hWnd) {
         MessageBoxW(NULL, L"Failed to create the main window.", L"Error", MB_ICONERROR);
         return -1;
@@ -248,34 +315,19 @@ void runFFmpeg(const std::wstring& inputFile, const std::wstring& outputFile) {
     }
 }
 
-std::vector<std::wstring> crawlArchiveDates(const std::wstring& baseUrl) {
-    // Fetch JSON data from the server
-    std::wstring jsonData = fetchJsonData(baseUrl);
+std::vector<std::wstring> crawlArchiveDates(const std::wstring& baseUrl, const std::wstring& date) {
+    // Construct the AJAX URL
+    std::wstring ajaxUrl = baseUrl + L"?feedId=39972&date=" + date;
 
-    // Parse the JSON data to extract dates
+    // Fetch JSON data from the AJAX endpoint
+    std::wstring jsonData = fetchJsonData(ajaxUrl);
+
+    // Parse the JSON data to extract archive information
     return parseJsonDates(jsonData);
 }
 
-void downloadFeedArchives(HWND hWnd, HWND hProgressBar, const std::wstring& archiveUrl) {
-    std::wstring curlPath = L"bin\\curl.exe"; // Path to curl executable
-    std::wstring command = L"\"" + curlPath + L"\" -O \"" + archiveUrl + L"\"";
-
-    // Run curl to download the archive
-    int result = _wsystem(command.c_str());
-    if (result != 0) {
-        MessageBox(hWnd, L"Failed to download archive. Please check your internet connection.", L"Error", MB_ICONERROR);
-    } else {
-        MessageBox(hWnd, L"Archive downloaded successfully.", L"Success", MB_ICONINFORMATION);
-    }
-
-    // Update progress bar (if applicable)
-    if (hProgressBar) {
-        SendMessage(hProgressBar, PBM_SETPOS, 100, 0);
-    }
-}
-
 void presentDateMenu(const std::wstring& baseUrl) {
-    std::vector<std::wstring> dates = crawlArchiveDates(baseUrl);
+    std::vector<std::wstring> dates = crawlArchiveDates(baseUrl, L"04/18/2025");
 
     if (dates.empty()) {
         std::wcerr << L"No valid dates found in the archive.\n";
@@ -291,11 +343,9 @@ void presentDateMenu(const std::wstring& baseUrl) {
     std::wstring input;
     std::wcin.ignore(); // Clear input buffer
     std::getline(std::wcin, input);
-
     std::wstringstream ss(input);
     std::wstring token;
     std::vector<int> selectedIndices;
-
     while (std::getline(ss, token, L',')) {
         try {
             int index = std::stoi(token);
@@ -319,7 +369,6 @@ std::wstring fetchJsonData(const std::wstring& url) {
     std::wstring curlPath = L"bin\\curl.exe"; // Path to curl executable
     std::wstring command = L"\"" + curlPath + L"\" -s \"" + url + L"\"";
     std::wstring output;
-
     FILE* pipe = _wpopen(command.c_str(), L"r");
     if (!pipe) {
         std::wcerr << L"Failed to run curl command.\n";
@@ -335,7 +384,6 @@ std::wstring fetchJsonData(const std::wstring& url) {
     return output;
 }
 
-// Function to parse JSON data
 std::vector<std::wstring> parseJsonDates(const std::wstring& jsonData) {
     std::vector<std::wstring> dates;
     try {
@@ -343,15 +391,24 @@ std::vector<std::wstring> parseJsonDates(const std::wstring& jsonData) {
         std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
         std::string jsonString = converter.to_bytes(jsonData);
 
-        // Parse the JSON string
+        // Parse the JSON string using nlohmann/json
         json parsedJson = json::parse(jsonString);
 
-        // Extract dates (assuming the JSON structure contains a "dates" array)
+        // Ensure the JSON contains a "dates" array
+        if (!parsedJson.contains("dates") || !parsedJson["dates"].is_array()) {
+            std::wcerr << L"Invalid JSON structure: 'dates' array not found." << std::endl;
+            return dates;
+        }
+
+        // Extract dates from the "dates" array
         for (const auto& date : parsedJson["dates"]) {
-            dates.push_back(converter.from_bytes(date.get<std::string>()));
+            if (date.is_string()) {
+                dates.push_back(converter.from_bytes(date.get<std::string>()));
+            }
         }
     } catch (const std::exception& e) {
-        std::wcerr << L"Failed to parse JSON: " << e.what() << std::endl;
+        std::wcerr << L"Exception during JSON parsing: " << e.what() << std::endl;
     }
+
     return dates;
 }
