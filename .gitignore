@@ -56,3 +56,4 @@ build/x64/Release/ZERO_CHECK/ZERO_CHECK.recipe
 build/ZERO_CHECK.vcxproj.filters
 .vs/FeedFetcher/CopilotIndices/17.13.441.19478/CodeChunks.db
 .vs/FeedFetcher/copilot-chat/bb6c98d2/sessions/98bb8d2f-e8bf-4c05-b42e-c560fe593fb7
+*.vcxproj
