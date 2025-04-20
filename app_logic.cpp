@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 #define UNICODE // Ensure UNICODE is defined
 #include "app_logic.h"
 #include <windows.h>
@@ -183,3 +184,8 @@ void presentOptions(HWND hWnd) {
         DispatchMessage(&msg);
     }
 }
+=======
+version https://git-lfs.github.com/spec/v1
+oid sha256:c82a3f67584d122a32435382eeb700226b4972ac56b01bb11c497ca372f3d4ff
+size 7137
+>>>>>>> Stashed changes

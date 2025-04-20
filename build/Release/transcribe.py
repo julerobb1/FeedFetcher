@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import sys
 import os
 from pydub import AudioSegment
@@ -53,3 +54,8 @@ if __name__ == "__main__":
         transcribe_with_whisper(input_file)
     else:
         print(f"Error: Unknown engine '{engine}'. Use 'pocketsphinx' or 'whisper'.")
+=======
+version https://git-lfs.github.com/spec/v1
+oid sha256:2905ed2444f737b62839a7e658c9b8d4e2634a1c0aeb714a4742c458fac3c1b1
+size 1916
+>>>>>>> Stashed changes

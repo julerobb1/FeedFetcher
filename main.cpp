@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 #define UNICODE
 #include <windows.h>
 #include <CommCtrl.h>
@@ -355,3 +356,8 @@ std::vector<std::wstring> parseJsonDates(const std::wstring& jsonData) {
     }
     return dates;
 }
+=======
+version https://git-lfs.github.com/spec/v1
+oid sha256:04b17289d7472aee49e39d4ebf208426bde3f359ea87198eedabff42eee2c3ae
+size 16490
+>>>>>>> Stashed changes

@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import os
 import subprocess
 import sys
@@ -30,3 +31,8 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Setup failed: {e}")
         sys.exit(1)
+=======
+version https://git-lfs.github.com/spec/v1
+oid sha256:a2c1aeb0382e4c102e45756b2200402cd53f6c9cc508935214103eb33d7c8687
+size 1189
+>>>>>>> Stashed changes
