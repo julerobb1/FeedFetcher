@@ -86,6 +86,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
+      <AdditionalIncludeDirectories>Z:\Github\FeedFetcher;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -105,9 +106,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;GRAPHICAL_MODE;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>Z:\Github\FeedFetcher;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Z:\Github\FeedFetcher;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -117,7 +119,7 @@
     <PostBuildEvent>
       <Message></Message>
       <Command>setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/bin/Thumbs.db Z:/Github/FeedFetcher/bin/background.bmp Z:/Github/FeedFetcher/bin/bkg-demo.jpeg Z:/Github/FeedFetcher/bin/bkg-demo.jpg Z:/Github/FeedFetcher/bin/curl-ca-bundle.crt Z:/Github/FeedFetcher/bin/curl.exe Z:/Github/FeedFetcher/bin/ffmpeg.exe Z:/Github/FeedFetcher/bin/ffplay.exe Z:/Github/FeedFetcher/bin/ffprobe.exe Z:/Github/FeedFetcher/bin/image.png Z:/Github/FeedFetcher/bin/json.hpp Z:/Github/FeedFetcher/bin/libcurl-x64.def Z:/Github/FeedFetcher/bin/libcurl-x64.dll Z:/Github/FeedFetcher/build/Debug
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/bin/Thumbs.db Z:/Github/FeedFetcher/bin/background.bmp Z:/Github/FeedFetcher/bin/bkg-demo.jpeg Z:/Github/FeedFetcher/bin/bkg-demo.jpg Z:/Github/FeedFetcher/bin/curl-ca-bundle.crt Z:/Github/FeedFetcher/bin/ffmpeg.exe Z:/Github/FeedFetcher/bin/ffplay.exe Z:/Github/FeedFetcher/bin/ffprobe.exe Z:/Github/FeedFetcher/bin/image.png Z:/Github/FeedFetcher/bin/libcurl-x64.def Z:/Github/FeedFetcher/build/Debug
 if %errorlevel% neq 0 goto :cmEnd
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/python_scripts/setup.py Z:/Github/FeedFetcher/python_scripts/transcribe.py Z:/Github/FeedFetcher/python_scripts/transcriber.py Z:/Github/FeedFetcher/build/Debug
 if %errorlevel% neq 0 goto :cmEnd
@@ -144,6 +146,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
+      <AdditionalIncludeDirectories>Z:\Github\FeedFetcher;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -164,9 +167,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;GRAPHICAL_MODE;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>Z:\Github\FeedFetcher;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Z:\Github\FeedFetcher;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -176,7 +180,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <PostBuildEvent>
       <Message></Message>
       <Command>setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/bin/Thumbs.db Z:/Github/FeedFetcher/bin/background.bmp Z:/Github/FeedFetcher/bin/bkg-demo.jpeg Z:/Github/FeedFetcher/bin/bkg-demo.jpg Z:/Github/FeedFetcher/bin/curl-ca-bundle.crt Z:/Github/FeedFetcher/bin/curl.exe Z:/Github/FeedFetcher/bin/ffmpeg.exe Z:/Github/FeedFetcher/bin/ffplay.exe Z:/Github/FeedFetcher/bin/ffprobe.exe Z:/Github/FeedFetcher/bin/image.png Z:/Github/FeedFetcher/bin/json.hpp Z:/Github/FeedFetcher/bin/libcurl-x64.def Z:/Github/FeedFetcher/bin/libcurl-x64.dll Z:/Github/FeedFetcher/build/Release
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/bin/Thumbs.db Z:/Github/FeedFetcher/bin/background.bmp Z:/Github/FeedFetcher/bin/bkg-demo.jpeg Z:/Github/FeedFetcher/bin/bkg-demo.jpg Z:/Github/FeedFetcher/bin/curl-ca-bundle.crt Z:/Github/FeedFetcher/bin/ffmpeg.exe Z:/Github/FeedFetcher/bin/ffplay.exe Z:/Github/FeedFetcher/bin/ffprobe.exe Z:/Github/FeedFetcher/bin/image.png Z:/Github/FeedFetcher/bin/libcurl-x64.def Z:/Github/FeedFetcher/build/Release
 if %errorlevel% neq 0 goto :cmEnd
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/python_scripts/setup.py Z:/Github/FeedFetcher/python_scripts/transcribe.py Z:/Github/FeedFetcher/python_scripts/transcriber.py Z:/Github/FeedFetcher/build/Release
 if %errorlevel% neq 0 goto :cmEnd
@@ -203,6 +207,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
     <ClCompile>
+      <AdditionalIncludeDirectories>Z:\Github\FeedFetcher;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -223,9 +228,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;GRAPHICAL_MODE;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>Z:\Github\FeedFetcher;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Z:\Github\FeedFetcher;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -235,7 +241,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <PostBuildEvent>
       <Message></Message>
       <Command>setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/bin/Thumbs.db Z:/Github/FeedFetcher/bin/background.bmp Z:/Github/FeedFetcher/bin/bkg-demo.jpeg Z:/Github/FeedFetcher/bin/bkg-demo.jpg Z:/Github/FeedFetcher/bin/curl-ca-bundle.crt Z:/Github/FeedFetcher/bin/curl.exe Z:/Github/FeedFetcher/bin/ffmpeg.exe Z:/Github/FeedFetcher/bin/ffplay.exe Z:/Github/FeedFetcher/bin/ffprobe.exe Z:/Github/FeedFetcher/bin/image.png Z:/Github/FeedFetcher/bin/json.hpp Z:/Github/FeedFetcher/bin/libcurl-x64.def Z:/Github/FeedFetcher/bin/libcurl-x64.dll Z:/Github/FeedFetcher/build/MinSizeRel
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/bin/Thumbs.db Z:/Github/FeedFetcher/bin/background.bmp Z:/Github/FeedFetcher/bin/bkg-demo.jpeg Z:/Github/FeedFetcher/bin/bkg-demo.jpg Z:/Github/FeedFetcher/bin/curl-ca-bundle.crt Z:/Github/FeedFetcher/bin/ffmpeg.exe Z:/Github/FeedFetcher/bin/ffplay.exe Z:/Github/FeedFetcher/bin/ffprobe.exe Z:/Github/FeedFetcher/bin/image.png Z:/Github/FeedFetcher/bin/libcurl-x64.def Z:/Github/FeedFetcher/build/MinSizeRel
 if %errorlevel% neq 0 goto :cmEnd
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/python_scripts/setup.py Z:/Github/FeedFetcher/python_scripts/transcribe.py Z:/Github/FeedFetcher/python_scripts/transcriber.py Z:/Github/FeedFetcher/build/MinSizeRel
 if %errorlevel% neq 0 goto :cmEnd
@@ -262,6 +268,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <ClCompile>
+      <AdditionalIncludeDirectories>Z:\Github\FeedFetcher;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -281,9 +288,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;GRAPHICAL_MODE;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>Z:\Github\FeedFetcher;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Z:\Github\FeedFetcher;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -293,7 +301,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <PostBuildEvent>
       <Message></Message>
       <Command>setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/bin/Thumbs.db Z:/Github/FeedFetcher/bin/background.bmp Z:/Github/FeedFetcher/bin/bkg-demo.jpeg Z:/Github/FeedFetcher/bin/bkg-demo.jpg Z:/Github/FeedFetcher/bin/curl-ca-bundle.crt Z:/Github/FeedFetcher/bin/curl.exe Z:/Github/FeedFetcher/bin/ffmpeg.exe Z:/Github/FeedFetcher/bin/ffplay.exe Z:/Github/FeedFetcher/bin/ffprobe.exe Z:/Github/FeedFetcher/bin/image.png Z:/Github/FeedFetcher/bin/json.hpp Z:/Github/FeedFetcher/bin/libcurl-x64.def Z:/Github/FeedFetcher/bin/libcurl-x64.dll Z:/Github/FeedFetcher/build/RelWithDebInfo
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/bin/Thumbs.db Z:/Github/FeedFetcher/bin/background.bmp Z:/Github/FeedFetcher/bin/bkg-demo.jpeg Z:/Github/FeedFetcher/bin/bkg-demo.jpg Z:/Github/FeedFetcher/bin/curl-ca-bundle.crt Z:/Github/FeedFetcher/bin/ffmpeg.exe Z:/Github/FeedFetcher/bin/ffplay.exe Z:/Github/FeedFetcher/bin/ffprobe.exe Z:/Github/FeedFetcher/bin/image.png Z:/Github/FeedFetcher/bin/libcurl-x64.def Z:/Github/FeedFetcher/build/RelWithDebInfo
 if %errorlevel% neq 0 goto :cmEnd
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different Z:/Github/FeedFetcher/python_scripts/setup.py Z:/Github/FeedFetcher/python_scripts/transcribe.py Z:/Github/FeedFetcher/python_scripts/transcriber.py Z:/Github/FeedFetcher/build/RelWithDebInfo
 if %errorlevel% neq 0 goto :cmEnd

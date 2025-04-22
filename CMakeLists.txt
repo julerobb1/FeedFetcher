@@ -84,3 +84,5 @@ target_link_libraries(${EXECUTABLE_NAME} Comctl32)
 # Ensure the setup.py and transcribe.py scripts are copied
 # file(COPY ${PYTHON_SCRIPTS_DIR}/setup.py DESTINATION ${RELEASE_DIR})
 # file(COPY ${PYTHON_SCRIPTS_DIR}/transcribe.py DESTINATION ${RELEASE_DIR})
+
+include_directories(${CMAKE_SOURCE_DIR})
