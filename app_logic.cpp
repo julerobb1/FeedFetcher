@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 #define UNICODE // Ensure UNICODE is defined
 #include "app_logic.h"
 #include <windows.h>
@@ -32,13 +31,28 @@ void downloadFeedArchives(HWND hWnd, HWND hProgressBar, const std::wstring& feed
     std::wstring outputFile = L"archives/feed_archive.zip";
     std::wstring command = curlPath + L" -o " + outputFile + L" " + feedUrl;
 
-    SendMessage(hProgressBar, PBM_SETPOS, 50, 0); // Update progress bar to 50%
+    // Set progress bar range and style for smooth progress (optional, safe to call multiple times)
+    if (hProgressBar) {
+        SendMessage(hProgressBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
+        LONG_PTR style = GetWindowLongPtr(hProgressBar, GWL_STYLE);
+        SetWindowLongPtr(hProgressBar, GWL_STYLE, style | PBS_SMOOTH);
+        SendMessage(hProgressBar, PBM_SETPOS, 10, 0); // Start at 10%
+    }
+
+    // Simulate progress (optional, for visual feedback)
+    if (hProgressBar) SendMessage(hProgressBar, PBM_SETPOS, 30, 0);
 
     int result = _wsystem(command.c_str());
+
     if (result == 0) {
-        SendMessage(hProgressBar, PBM_SETPOS, 100, 0); // Update progress bar to 100%
+        if (hProgressBar) {
+            SendMessage(hProgressBar, PBM_SETPOS, 100, 0); // Set to 100% on success
+        }
         MessageBoxW(hWnd, L"Feed archives downloaded successfully.", L"Success", MB_OK);
     } else {
+        if (hProgressBar) {
+            SendMessage(hProgressBar, PBM_SETPOS, 0, 0); // Reset on failure
+        }
         MessageBoxW(hWnd, L"Failed to download feed archives.", L"Error", MB_ICONERROR);
     }
 }
@@ -184,8 +198,3 @@ void presentOptions(HWND hWnd) {
         DispatchMessage(&msg);
     }
 }
-=======
-version https://git-lfs.github.com/spec/v1
-oid sha256:c82a3f67584d122a32435382eeb700226b4972ac56b01bb11c497ca372f3d4ff
-size 7137
->>>>>>> Stashed changes

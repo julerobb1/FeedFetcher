@@ -20,7 +20,7 @@ set(ROOT_SOURCES
     main.cpp
     app_logic.cpp
     AudioAnalyzer.cpp
-    CLoginDialog.cpp
+    # CLoginDialog.cpp (Ensure this file exists or remove this line if unnecessary)
     FeedDownloader.cpp
 )
 
@@ -55,7 +55,7 @@ set(EXECUTABLE_NAME "FeedFetcher_${BUILD_NUMBER}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # Add executable for the project
-add_executable(${EXECUTABLE_NAME} ${ROOT_SOURCES} ${ROOT_HEADERS})
+add_executable(${EXECUTABLE_NAME})
 
 # Pass GRAPHICAL_MODE definition to the compiler if enabled
 if(GRAPHICAL_MODE)
