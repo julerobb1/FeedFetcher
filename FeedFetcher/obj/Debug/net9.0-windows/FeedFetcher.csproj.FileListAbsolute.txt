@@ -1,0 +1,15 @@
+C:\Users\juler\Documents\GitHub\FeedFetcher\FeedFetcher\bin\Debug\net9.0-windows\FeedFetcher.exe
+C:\Users\juler\Documents\GitHub\FeedFetcher\FeedFetcher\bin\Debug\net9.0-windows\FeedFetcher.deps.json
+C:\Users\juler\Documents\GitHub\FeedFetcher\FeedFetcher\bin\Debug\net9.0-windows\FeedFetcher.runtimeconfig.json
+C:\Users\juler\Documents\GitHub\FeedFetcher\FeedFetcher\bin\Debug\net9.0-windows\FeedFetcher.dll
+C:\Users\juler\Documents\GitHub\FeedFetcher\FeedFetcher\bin\Debug\net9.0-windows\FeedFetcher.pdb
+C:\Users\juler\Documents\GitHub\FeedFetcher\FeedFetcher\obj\Debug\net9.0-windows\FeedFetcher.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\juler\Documents\GitHub\FeedFetcher\FeedFetcher\obj\Debug\net9.0-windows\FeedFetcher.AssemblyInfoInputs.cache
+C:\Users\juler\Documents\GitHub\FeedFetcher\FeedFetcher\obj\Debug\net9.0-windows\FeedFetcher.AssemblyInfo.cs
+C:\Users\juler\Documents\GitHub\FeedFetcher\FeedFetcher\obj\Debug\net9.0-windows\FeedFetcher.csproj.CoreCompileInputs.cache
+C:\Users\juler\Documents\GitHub\FeedFetcher\FeedFetcher\obj\Debug\net9.0-windows\FeedFetcher.sourcelink.json
+C:\Users\juler\Documents\GitHub\FeedFetcher\FeedFetcher\obj\Debug\net9.0-windows\FeedFetcher.dll
+C:\Users\juler\Documents\GitHub\FeedFetcher\FeedFetcher\obj\Debug\net9.0-windows\refint\FeedFetcher.dll
+C:\Users\juler\Documents\GitHub\FeedFetcher\FeedFetcher\obj\Debug\net9.0-windows\FeedFetcher.pdb
+C:\Users\juler\Documents\GitHub\FeedFetcher\FeedFetcher\obj\Debug\net9.0-windows\FeedFetcher.genruntimeconfig.cache
+C:\Users\juler\Documents\GitHub\FeedFetcher\FeedFetcher\obj\Debug\net9.0-windows\ref\FeedFetcher.dll
